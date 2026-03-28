@@ -1,0 +1,1527 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SurpriseCraft Pro — Onvergetelijke Digitale Verrassingen</title>
+<meta name="description" content="Persoonlijke verrassing websites voor verjaardagen, liefdesboodschappen en speciale momenten.">
+<meta property="og:title" content="SurpriseCraft Pro">
+<meta property="og:description" content="Create unforgettable digital surprises">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<style>
+:root{
+--bg:#0f0b1a;--bg2:#1a1333;--bg3:#241d40;
+--card:#1e1740;--card2:#2a2050;
+--border:#3d2d6b;--text:#e8e0ff;--text2:#b8a8e0;--muted:#7a6aaa;
+--primary:#818cf8;--primary2:#6366f1;
+--accent:#a78bfa;--accent2:#7c3aed;
+--emerald:#34d399;--emerald2:#059669;
+--pink:#f472b6;--pink2:#ec4899;
+--rose:#fb7185;--amber:#fbbf24;
+--shadow:rgba(99,102,241,0.15);
+--g1:linear-gradient(135deg,#6366f1,#a78bfa,#ec4899);
+--g2:linear-gradient(135deg,#1e1740,#2a2050);
+--r:16px;--rs:10px;
+--tr:all .3s cubic-bezier(.4,0,.2,1);
+--f1:'Space Grotesk','Inter',sans-serif;
+--f2:'Inter',sans-serif;
+}
+.light{
+--bg:#f8f7ff;--bg2:#eeeaff;--bg3:#e4deff;
+--card:#fff;--card2:#f3f0ff;
+--border:#d4c8f0;--text:#1a1333;--text2:#4a3d6b;--muted:#8a7daa;
+--shadow:rgba(99,102,241,.1);
+--g2:linear-gradient(135deg,#fff,#f3f0ff);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:var(--f2);background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden;transition:background .4s,color .4s}
+h1,h2,h3,h4,h5{font-family:var(--f1)}
+::-webkit-scrollbar{width:8px}
+::-webkit-scrollbar-track{background:var(--bg2)}
+::-webkit-scrollbar-thumb{background:var(--primary);border-radius:4px}
+
+#app-loader{position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bg);transition:opacity .6s,visibility .6s}
+#app-loader.hide{opacity:0;visibility:hidden;pointer-events:none}
+.loader-heart{font-size:56px;animation:ldP .8s infinite alternate}
+.loader-text{margin-top:16px;font-family:var(--f1);font-size:20px;color:var(--primary);font-weight:600}
+.loader-bar{width:200px;height:4px;background:var(--bg3);border-radius:4px;margin-top:20px;overflow:hidden}
+.loader-bar-inner{width:0%;height:100%;background:var(--g1);border-radius:4px;animation:ldB 1.5s ease forwards}
+@keyframes ldP{0%{transform:scale(1)}100%{transform:scale(1.3)}}
+@keyframes ldB{0%{width:0}100%{width:100%}}
+
+.navbar{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(15,11,26,.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 40px;height:70px;display:flex;align-items:center;justify-content:space-between;transition:var(--tr)}
+.light .navbar{background:rgba(248,247,255,.9)}
+.nav-brand{font-family:var(--f1);font-size:22px;font-weight:700;background:var(--g1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;cursor:pointer}
+.nav-links{display:flex;gap:8px;list-style:none}
+.nav-links li a{color:var(--text2);text-decoration:none;font-size:14px;font-weight:500;padding:8px 14px;border-radius:8px;transition:var(--tr);cursor:pointer}
+.nav-links li a:hover,.nav-links li a.active{color:var(--primary);background:rgba(99,102,241,.1)}
+.nav-right{display:flex;align-items:center;gap:10px}
+.nav-toggle{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:6px 12px;border-radius:8px;font-size:13px;cursor:pointer;transition:var(--tr);font-family:var(--f2)}
+.nav-toggle:hover{border-color:var(--primary);color:var(--primary)}
+.hamburger{display:none;background:none;border:none;color:var(--text);font-size:24px;cursor:pointer}
+.mobile-menu{display:none;position:fixed;top:70px;left:0;right:0;background:var(--bg);border-bottom:1px solid var(--border);padding:20px;z-index:999;flex-direction:column;gap:4px}
+.mobile-menu.open{display:flex}
+.mobile-menu a{color:var(--text2);text-decoration:none;padding:12px 16px;border-radius:8px;font-size:15px;transition:var(--tr);cursor:pointer}
+.mobile-menu a:hover{background:rgba(99,102,241,.1);color:var(--primary)}
+.light .mobile-menu{background:var(--bg)}
+
+.hero{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:100px 40px 60px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;width:600px;height:600px;background:radial-gradient(circle,rgba(99,102,241,.15),transparent 70%);top:-100px;right:-100px;border-radius:50%;animation:bF 8s infinite alternate}
+.hero::after{content:'';position:absolute;width:400px;height:400px;background:radial-gradient(circle,rgba(236,72,153,.12),transparent 70%);bottom:-50px;left:-50px;border-radius:50%;animation:bF 10s infinite alternate-reverse}
+@keyframes bF{0%{transform:translate(0,0) scale(1)}100%{transform:translate(40px,-40px) scale(1.15)}}
+.hero-inner{max-width:800px;text-align:center;position:relative;z-index:2}
+.hero-badge{display:inline-block;background:rgba(99,102,241,.15);color:var(--primary);padding:8px 20px;border-radius:50px;font-size:13px;font-weight:600;margin-bottom:24px;border:1px solid rgba(99,102,241,.2)}
+.hero h1{font-size:clamp(32px,6vw,56px);font-weight:700;line-height:1.2;margin-bottom:24px}
+.hero .hl{background:var(--g1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-sub{font-size:clamp(16px,2.5vw,20px);color:var(--text2);max-width:600px;margin:0 auto 32px;line-height:1.7}
+.hero-btns{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+.btn{font-family:var(--f2);padding:14px 32px;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;border:none;transition:var(--tr)}
+.btn-primary{background:var(--g1);color:#fff}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 24px var(--shadow)}
+.btn-secondary{background:transparent;color:var(--primary);border:2px solid var(--border)}
+.btn-secondary:hover{border-color:var(--primary);background:rgba(99,102,241,.1)}
+.hero-stats{display:flex;gap:40px;justify-content:center;margin-top:48px}
+.hero-stat-num{font-size:28px;font-weight:700;color:var(--primary)}
+.hero-stat-lbl{font-size:13px;color:var(--muted)}
+
+.section{max-width:1100px;margin:0 auto;padding:80px 40px}
+.section-badge{display:inline-block;background:rgba(99,102,241,.12);color:var(--primary);padding:6px 16px;border-radius:50px;font-size:12px;font-weight:600;margin-bottom:16px;border:1px solid rgba(99,102,241,.15)}
+.section-title{font-size:clamp(28px,4vw,40px);font-weight:700;margin-bottom:40px}
+
+.about-grid{display:grid;grid-template-columns:auto 1fr;gap:40px;align-items:center}
+.about-avatar{width:200px;height:200px;border-radius:50%;background:var(--g1);display:flex;align-items:center;justify-content:center;font-size:80px;box-shadow:0 0 60px var(--shadow)}
+.about-text p{color:var(--text2);margin-bottom:16px;font-size:16px;line-height:1.8}
+.about-stats{display:flex;gap:24px;margin-top:24px}
+.about-stat{background:var(--card);padding:16px;border-radius:12px;border:1px solid var(--border);text-align:center;min-width:100px}
+.about-stat-num{font-size:22px;font-weight:700;color:var(--primary)}
+.about-stat-lbl{font-size:12px;color:var(--muted)}
+
+.services-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px}
+.service-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:32px 24px;transition:var(--tr);text-align:center}
+.service-card:hover{transform:translateY(-4px);border-color:var(--primary);box-shadow:0 12px 32px var(--shadow)}
+.service-icon{font-size:48px;margin-bottom:16px}
+.service-card h3{font-size:18px;margin-bottom:10px}
+.service-card p{font-size:14px;color:var(--text2);line-height:1.6}
+
+.demo-filter{display:flex;gap:8px;justify-content:center;margin-bottom:32px;flex-wrap:wrap}
+.demo-filter button{background:var(--card);color:var(--text2);border:1px solid var(--border);padding:8px 20px;border-radius:50px;font-size:13px;cursor:pointer;transition:var(--tr);font-family:var(--f2)}
+.demo-filter button.active,.demo-filter button:hover{background:var(--primary);color:#fff;border-color:var(--primary)}
+.demo-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
+.demo-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;transition:var(--tr)}
+.demo-card:hover{transform:translateY(-4px);box-shadow:0 12px 32px var(--shadow)}
+.demo-cover{height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative}
+.demo-type{position:absolute;top:12px;right:12px;background:rgba(0,0,0,.4);color:#fff;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600;backdrop-filter:blur(4px)}
+.demo-info{padding:20px}
+.demo-info h3{font-size:18px;margin-bottom:6px}
+.demo-info p{font-size:13px;color:var(--text2);margin-bottom:14px}
+.demo-btns{display:flex;gap:8px;flex-wrap:wrap}
+.demo-btn{font-family:var(--f2);padding:8px 16px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--card2);color:var(--text);text-decoration:none;transition:var(--tr)}
+.demo-btn:hover{border-color:var(--primary);color:var(--primary)}
+.demo-btn.primary{background:var(--primary);color:#fff;border-color:var(--primary)}
+.demo-btn.wa{background:#25d366;color:#fff;border-color:#25d366}
+
+.demo-viewer{position:fixed;inset:0;z-index:2000;background:var(--bg);display:flex;flex-direction:column}
+.demo-viewer-bar{height:50px;background:var(--card);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:16px;font-size:14px}
+.demo-viewer-bar button{background:var(--primary);color:#fff;border:none;padding:8px 16px;border-radius:8px;cursor:pointer;font-family:var(--f2);font-size:13px;font-weight:500}
+
+.pricing-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;max-width:900px;margin:0 auto}
+.pricing-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:32px 28px;transition:var(--tr);position:relative}
+.pricing-card:hover{transform:translateY(-4px);box-shadow:0 12px 32px var(--shadow)}
+.pricing-card.featured{border-color:var(--primary);box-shadow:0 0 40px var(--shadow)}
+.pricing-pop{position:absolute;top:-12px;right:20px;background:var(--g1);color:#fff;padding:4px 16px;border-radius:50px;font-size:12px;font-weight:600}
+.pricing-name{font-size:20px;font-weight:700;margin-bottom:8px}
+.pricing-price{font-size:32px;font-weight:700;color:var(--primary);margin-bottom:20px}
+.pricing-features{list-style:none;margin-bottom:24px}
+.pricing-features li{padding:6px 0;font-size:14px;color:var(--text2)}
+.pricing-features li::before{content:'✓ ';color:var(--emerald);font-weight:700}
+.pricing-cta{padding:12px 24px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:var(--tr);font-family:var(--f2)}
+.pc-primary{background:var(--g1);color:#fff}
+.pc-secondary{background:var(--card2);color:var(--text);border:1px solid var(--border)}
+
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;max-width:900px;margin:0 auto}
+.contact-form{display:flex;flex-direction:column;gap:16px}
+.form-group{display:flex;flex-direction:column;gap:4px}
+.form-group label{font-size:13px;font-weight:600;color:var(--text2)}
+.form-group input,.form-group textarea{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 16px;color:var(--text);font-size:14px;font-family:var(--f2);transition:var(--tr)}
+.form-group input:focus,.form-group textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(99,102,241,.15)}
+.form-group textarea{min-height:120px;resize:vertical}
+.form-submit{background:var(--g1);color:#fff;border:none;padding:14px 28px;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;transition:var(--tr);font-family:var(--f2)}
+.form-submit:hover{transform:translateY(-2px);box-shadow:0 8px 24px var(--shadow)}
+.contact-info{display:flex;flex-direction:column;gap:16px}
+.contact-info-card{display:flex;gap:14px;align-items:center;padding:16px;background:var(--card);border:1px solid var(--border);border-radius:12px}
+.contact-info-icon{font-size:24px}
+.contact-info-card h4{font-size:14px;font-weight:600}
+.contact-info-card p{font-size:13px;color:var(--text2)}
+
+.footer{text-align:center;padding:40px 20px;border-top:1px solid var(--border);margin-top:60px}
+.footer-brand{font-family:var(--f1);font-size:20px;font-weight:700;background:var(--g1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;cursor:pointer;margin-bottom:16px}
+.footer-socials{display:flex;gap:16px;justify-content:center;margin-bottom:16px}
+.footer-socials a{font-size:20px;text-decoration:none;transition:var(--tr)}
+.footer-socials a:hover{transform:scale(1.2)}
+.footer-disc{font-size:12px;color:var(--muted);margin-bottom:8px}
+.footer-copy{font-size:11px;color:var(--muted)}
+
+.fh{position:fixed;bottom:-50px;opacity:0;animation:fhF linear infinite;pointer-events:none;z-index:0}
+@keyframes fhF{0%{opacity:0;transform:translateY(0) rotate(0)}10%{opacity:.6}90%{opacity:.1}100%{opacity:0;transform:translateY(-110vh) rotate(360deg)}}
+
+.wa-float{position:fixed;bottom:24px;right:24px;z-index:999;width:56px;height:56px;border-radius:50%;background:#25d366;display:flex;align-items:center;justify-content:center;font-size:28px;text-decoration:none;box-shadow:0 4px 16px rgba(37,211,102,.4);transition:var(--tr);animation:waP 2s infinite}
+.wa-float:hover{transform:scale(1.1)}
+@keyframes waP{0%,100%{box-shadow:0 4px 16px rgba(37,211,102,.4)}50%{box-shadow:0 4px 32px rgba(37,211,102,.6)}}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--primary);color:#fff;padding:12px 28px;border-radius:12px;font-size:14px;font-weight:600;z-index:9999;transition:var(--tr);opacity:0;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* Admin styles */
+.admin-wrap{max-width:1100px;margin:0 auto;padding:90px 20px 40px}
+.admin-login{display:flex;justify-content:center;align-items:center;min-height:80vh}
+.admin-login-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:40px;text-align:center;max-width:400px;width:100%}
+.admin-login-card h2{margin-bottom:8px}
+.admin-login-card p{color:var(--text2);font-size:14px;margin-bottom:20px}
+.admin-login-card input{width:100%;padding:12px 16px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:14px;margin-bottom:12px;font-family:var(--f2)}
+.admin-login-card button{width:100%;padding:12px;border-radius:10px;background:var(--g1);color:#fff;border:none;font-size:15px;font-weight:600;cursor:pointer;font-family:var(--f2)}
+.admin-login-err{color:var(--rose);font-size:13px;margin-top:8px}
+.admin-tabs{display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap;border-bottom:1px solid var(--border);padding-bottom:12px}
+.admin-tab{background:var(--card);color:var(--text2);border:1px solid var(--border);padding:8px 16px;border-radius:8px;font-size:13px;cursor:pointer;transition:var(--tr);font-family:var(--f2);white-space:nowrap}
+.admin-tab:hover{border-color:var(--primary);color:var(--primary)}
+.admin-tab.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.admin-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:24px;margin-bottom:16px}
+.admin-card h3{margin-bottom:16px;font-size:20px}
+.admin-stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+.admin-stat{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:20px;text-align:center}
+.admin-stat-num{font-size:28px;font-weight:700;color:var(--primary)}
+.admin-stat-lbl{font-size:13px;color:var(--muted);margin-top:4px}
+.admin-msg-list{display:flex;flex-direction:column;gap:10px}
+.admin-msg{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:16px}
+.admin-msg h4{font-size:15px;margin-bottom:6px}
+.admin-msg-t{font-size:13px;color:var(--text2)}
+.admin-msg-a{display:flex;gap:8px;margin-top:10px}
+.admin-msg-btn{padding:6px 14px;border-radius:6px;font-size:12px;cursor:pointer;border:1px solid var(--border);background:var(--card2);color:var(--text);transition:var(--tr);font-family:var(--f2)}
+.admin-msg-btn:hover{border-color:var(--primary)}
+.admin-msg-btn.del{border-color:var(--rose);color:var(--rose)}
+
+.adm-demo-list{display:flex;flex-direction:column;gap:10px}
+.adm-demo-item{display:flex;align-items:center;gap:16px;padding:16px;background:var(--bg);border:1px solid var(--border);border-radius:10px;flex-wrap:wrap}
+.adm-demo-item h4{font-size:15px}
+.adm-demo-item p{font-size:12px;color:var(--muted);margin-top:2px}
+.adm-demo-btns{display:flex;gap:6px;flex-wrap:wrap}
+.adm-save{padding:8px 16px;border-radius:8px;background:var(--g1);color:#fff;border:none;font-size:13px;font-weight:600;cursor:pointer;transition:var(--tr);font-family:var(--f2)}
+.adm-save:hover{transform:translateY(-1px);box-shadow:0 4px 12px var(--shadow)}
+.adm-del{padding:8px 16px;border-radius:8px;background:rgba(251,113,133,.15);color:var(--rose);border:1px solid var(--rose);font-size:13px;cursor:pointer;transition:var(--tr);font-family:var(--f2)}
+.adm-clone{padding:8px 16px;border-radius:8px;background:rgba(52,211,153,.15);color:var(--emerald);border:1px solid var(--emerald);font-size:13px;cursor:pointer;transition:var(--tr);font-family:var(--f2)}
+
+.modal-overlay{position:fixed;inset:0;z-index:5000;background:rgba(0,0,0,.6);display:flex;align-items:flex-start;justify-content:center;padding:40px 20px;overflow-y:auto;backdrop-filter:blur(4px)}
+.modal-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:32px;max-width:900px;width:100%;position:relative;margin:auto}
+.modal-close{position:absolute;top:16px;right:16px;background:none;border:none;color:var(--text);font-size:20px;cursor:pointer}
+.adm-section{margin:16px 0;padding:16px;background:var(--bg);border:1px solid var(--border);border-radius:10px}
+.adm-section h4{font-size:14px;color:var(--primary);margin-bottom:10px}
+.adm-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.adm-lbl{font-size:12px;font-weight:600;color:var(--text2);margin:6px 0 2px;display:block}
+.adm-input{width:100%;padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:13px;font-family:var(--f2)}
+.adm-input:focus{outline:none;border-color:var(--primary)}
+.adm-ta{width:100%;padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:13px;font-family:var(--f2);min-height:70px;resize:vertical}
+.adm-ta:focus{outline:none;border-color:var(--primary)}
+
+.photo-manager{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.photo-item{display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:13px}
+.photo-item img{width:40px;height:40px;object-fit:cover;border-radius:6px}
+.photo-item-del{background:none;border:none;color:var(--rose);cursor:pointer;font-size:16px;padding:0 4px;line-height:1}
+.photo-add-row{display:flex;gap:6px;margin-top:8px;align-items:center}
+.photo-add-row input{flex:1;padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:13px;font-family:var(--f2)}
+.photo-add-btn{padding:8px 14px;border-radius:8px;background:var(--emerald);color:#fff;border:none;font-size:13px;cursor:pointer;font-family:var(--f2);white-space:nowrap}
+
+@media(max-width:768px){
+.nav-links{display:none}.hamburger{display:block}
+.hero{padding:100px 20px 40px}
+.hero-stats{gap:20px}
+.about-grid{grid-template-columns:1fr;text-align:center}
+.about-avatar{margin:0 auto}
+.contact-grid{grid-template-columns:1fr}
+.navbar{padding:0 16px}
+.section{padding:60px 20px}
+.demo-grid{grid-template-columns:1fr}
+.adm-demo-item{flex-direction:column;align-items:flex-start}
+.adm-row{grid-template-columns:1fr}
+.modal-card{padding:20px}
+}
+</style>
+</head>
+<body>
+<div id="app-loader">
+<div class="loader-heart">💖</div>
+<div class="loader-text">SurpriseCraft Pro</div>
+<div class="loader-bar"><div class="loader-bar-inner"></div></div>
+</div>
+<div id="root"></div>
+
+<script>
+window.onerror=function(){
+var ld=document.getElementById("app-loader");
+if(ld){ld.classList.add("hide");setTimeout(function(){ld.style.display="none"},700)}
+};
+setTimeout(function(){
+var ld=document.getElementById("app-loader");
+if(ld&&!ld.classList.contains("hide")){ld.classList.add("hide");setTimeout(function(){ld.style.display="none"},700)}
+},5000);
+</script>
+
+<script>
+var db=null;
+try{
+var fApp=firebase.initializeApp({
+apiKey:"AIzaSyCn_Q2qYShPlyQt66qWDSo8JCobgyhVl2w",
+authDomain:"surprisewebsites.firebaseapp.com",
+databaseURL:"https://surprisewebsites-default-rtdb.europe-west1.firebasedatabase.app",
+projectId:"surprisewebsites",
+storageBucket:"surprisewebsites.firebasestorage.app",
+messagingSenderId:"775252322950",
+appId:"1:775252322950:web:1c1f184705ada294cbbf07"
+});
+db=firebase.database();
+}catch(ex){console.warn("Firebase init failed:",ex)}
+
+function fbSet(path,val){if(db)try{db.ref(path).set(val)}catch(e){}}
+function fbPush(path,val){if(db)try{db.ref(path).push(val)}catch(e){}}
+function fbRemove(path){if(db)try{db.ref(path).remove()}catch(e){}}
+function fbOn(path,cb){if(db)try{db.ref(path).on("value",function(s){cb(s.val())})}catch(e){}}
+
+var T={
+nl:{
+nav:{home:"Home",about:"Over Ons",services:"Diensten",demos:"Demo's",pricing:"Pakketten",contact:"Contact"},
+hero:{badge:"Digitale Verrassingen",t1:"Maak ",t2:"onvergetelijke",t3:" digitale verrassingen",sub:"Ik maak persoonlijke verrassing websites voor verjaardagen en romantische momenten.",cta1:"Bekijk Demo's",cta2:"Neem Contact Op",s1:"Verrassingen",s2:"Klanten",s3:"Jaar Erv."},
+about:{badge:"Over Mij",title:"Wie ben ik?",p1:"Ik ben een creatieve webontwikkelaar gespecialiseerd in het bouwen van persoonlijke verrassing websites.",p2:"Met jarenlange ervaring in webdesign en animatie creeer ik unieke digitale ervaringen.",s1:"Verrassingen",s2:"Tevreden Klanten",s3:"Jaar Erv."},
+services:{badge:"Diensten",title:"Wat ik bied",s1t:"Persoonlijke Verrassing Websites",s1d:"Op maat gemaakte verjaardag en romantische verrassing websites.",s2t:"Custom Design",s2d:"Persoonlijke berichten, foto's, muziek en animaties.",s3t:"Online Hosting",s3d:"Deel je verrassing via een unieke link.",s4t:"Snelle Levering",s4d:"Ontvang je website binnen 24-48 uur."},
+demos:{badge:"Demo's",title:"Demo Verrassingen",all:"Alle",birthday:"Verjaardag",romantic:"Romantisch",envelope:"Envelop",card:"Kaart",view:"Bekijk Demo",wa:"WhatsApp",email:"Email",back:"Terug"},
+pricing:{badge:"Pakketten",title:"Kies je pakket",pop:"Populair",cta:"Bestel via WhatsApp"},
+contact:{badge:"Contact",title:"Neem contact op",name:"Naam",email:"Email",phone:"Telefoon",msg:"Bericht",send:"Verstuur Bericht",sent:"Bericht verstuurd!",info:"Contact Info",or:"Of neem direct contact op"},
+footer:{disc:"Demo sites zijn voorbeelden. Persoonlijke verrassing websites zijn betaalde diensten."},
+admin:{
+login:"Voer het wachtwoord in om het admin paneel te openen",loginBtn:"Inloggen",wrongPw:"Verkeerd wachtwoord!",pwPlaceholder:"Wachtwoord...",
+panelTitle:"Admin Paneel",panelSub:"SurpriseCraft Pro beheerpaneel",
+tabDashboard:"Dashboard",tabMessages:"Berichten",tabDemos:"Demo's",tabPackages:"Pakketten",tabSettings:"Instellingen",logout:"Uitloggen",
+totalMsg:"Totaal Berichten",onlineVisitors:"Online Bezoekers",demoCount:"Aantal Demo's",pkgCount:"Aantal Pakketten",
+noMessages:"Nog geen berichten.",delete:"Verwijderen",
+demoSites:"Demo Sites",newBirthday:"+ Verjaardag",newRomantic:"+ Romantisch",newEnvelope:"+ Envelop",newCard:"+ Kaart",
+type:"Type",music:"Muziek",none:"geen",photos:"Foto's",items:"items",
+edit:"Bewerken",preview:"Voorbeeld",download:"Downloaden",clone:"Klonen",
+editDemo:"Demo Bewerken",generalInfo:"Algemene Informatie",musicUrl:"Muziek URL",bgCss:"Achtergrond CSS",
+photoManage:"Foto Beheer",addPhoto:"Foto Toevoegen",photoPlaceholder:"URL of emoji...",removePhoto:"Verwijderen",
+name3lang:"Naam (3 talen)",desc3lang:"Beschrijving (3 talen)",heroTitle3:"Hero Titel (3 talen)",heroMsg3:"Hero Bericht (3 talen)",letterMsg3:"Brief Bericht (3 talen)",
+save:"Opslaan",cancel:"Annuleren",
+editPkg:"Pakket Bewerken",general:"Algemeen",nameLabel:"Naam",price:"Prijs",featuredLabel:"Populair (Uitgelicht)",features:"Kenmerken (een per regel)",featPlaceholder:"Een kenmerk per regel",
+packages:"Pakketten",feature:"Kenmerken",
+siteSettings:"Site Instellingen",siteName:"Site Naam",location:"Locatie",statistics:"Statistieken",saveSettings:"Instellingen Opslaan",
+confirmDelete:"Weet je zeker dat je deze demo wilt verwijderen?",deleted:"Verwijderd!",demoSaved:"Demo opgeslagen!",demoDeleted:"Demo verwijderd!",demoCloned:"Demo gekloond!",pkgSaved:"Pakket opgeslagen!",settingsSaved:"Instellingen opgeslagen!",htmlDownloaded:"HTML gedownload!",
+newDemo:"Nieuwe Demo",descPlaceholder:"Beschrijving",titlePlaceholder:"Titel",msgPlaceholder:"Bericht",letterPlaceholder:"Brief"
+}
+},
+en:{
+nav:{home:"Home",about:"About",services:"Services",demos:"Demos",pricing:"Packages",contact:"Contact"},
+hero:{badge:"Digital Surprises",t1:"Create ",t2:"unforgettable",t3:" digital surprises",sub:"I build personalized surprise websites for birthdays and romantic moments.",cta1:"See Demos",cta2:"Contact Me",s1:"Surprises",s2:"Clients",s3:"Years Exp."},
+about:{badge:"About Me",title:"Who am I?",p1:"I am a creative web developer specialized in building personalized surprise websites.",p2:"With years of experience in web design and animation, I create unique digital experiences.",s1:"Surprises",s2:"Happy Clients",s3:"Years Exp."},
+services:{badge:"Services",title:"What I offer",s1t:"Personalized Surprise Websites",s1d:"Custom birthday and romantic surprise websites.",s2t:"Custom Design",s2d:"Personal messages, photos, music and animations.",s3t:"Online Hosting",s3d:"Share your surprise via a unique link.",s4t:"Fast Delivery",s4d:"Receive your website within 24-48 hours."},
+demos:{badge:"Demos",title:"Demo Surprises",all:"All",birthday:"Birthday",romantic:"Romantic",envelope:"Envelope",card:"Card",view:"View Demo",wa:"WhatsApp",email:"Email",back:"Back"},
+pricing:{badge:"Packages",title:"Choose your package",pop:"Popular",cta:"Order via WhatsApp"},
+contact:{badge:"Contact",title:"Get in touch",name:"Name",email:"Email",phone:"Phone",msg:"Message",send:"Send Message",sent:"Message sent!",info:"Contact Info",or:"Or contact me directly"},
+footer:{disc:"Demo sites are examples. Personalized surprise websites are paid services."},
+admin:{
+login:"Enter password to access admin panel",loginBtn:"Login",wrongPw:"Wrong password!",pwPlaceholder:"Password...",
+panelTitle:"Admin Panel",panelSub:"SurpriseCraft Pro management panel",
+tabDashboard:"Dashboard",tabMessages:"Messages",tabDemos:"Demos",tabPackages:"Packages",tabSettings:"Settings",logout:"Logout",
+totalMsg:"Total Messages",onlineVisitors:"Online Visitors",demoCount:"Demo Count",pkgCount:"Package Count",
+noMessages:"No messages yet.",delete:"Delete",
+demoSites:"Demo Sites",newBirthday:"+ Birthday",newRomantic:"+ Romantic",newEnvelope:"+ Envelope",newCard:"+ Card",
+type:"Type",music:"Music",none:"none",photos:"Photos",items:"items",
+edit:"Edit",preview:"Preview",download:"Download",clone:"Clone",
+editDemo:"Edit Demo",generalInfo:"General Information",musicUrl:"Music URL",bgCss:"Background CSS",
+photoManage:"Photo Management",addPhoto:"Add Photo",photoPlaceholder:"URL or emoji...",removePhoto:"Remove",
+name3lang:"Name (3 languages)",desc3lang:"Description (3 languages)",heroTitle3:"Hero Title (3 languages)",heroMsg3:"Hero Message (3 languages)",letterMsg3:"Letter Message (3 languages)",
+save:"Save",cancel:"Cancel",
+editPkg:"Edit Package",general:"General",nameLabel:"Name",price:"Price",featuredLabel:"Popular (Featured)",features:"Features (one per line)",featPlaceholder:"One feature per line",
+packages:"Packages",feature:"Features",
+siteSettings:"Site Settings",siteName:"Site Name",location:"Location",statistics:"Statistics",saveSettings:"Save Settings",
+confirmDelete:"Are you sure you want to delete this demo?",deleted:"Deleted!",demoSaved:"Demo saved!",demoDeleted:"Demo deleted!",demoCloned:"Demo cloned!",pkgSaved:"Package saved!",settingsSaved:"Settings saved!",htmlDownloaded:"HTML downloaded!",
+newDemo:"New Demo",descPlaceholder:"Description",titlePlaceholder:"Title",msgPlaceholder:"Message",letterPlaceholder:"Letter"
+}
+},
+fr:{
+nav:{home:"Accueil",about:"A Propos",services:"Services",demos:"Demos",pricing:"Forfaits",contact:"Contact"},
+hero:{badge:"Surprises Digitales",t1:"Creez des ",t2:"inoubliables",t3:" surprises digitales",sub:"Je cree des sites surprises personnalises pour les anniversaires et les moments speciaux.",cta1:"Voir les Demos",cta2:"Contactez-moi",s1:"Surprises",s2:"Clients",s3:"Ans d'Exp."},
+about:{badge:"A Propos",title:"Qui suis-je?",p1:"Je suis un developpeur web creatif specialise dans la creation de sites web surprises personnalises.",p2:"Avec des annees d'experience en design web et animation, je cree des experiences digitales uniques.",s1:"Surprises",s2:"Clients Satisfaits",s3:"Ans d'Exp."},
+services:{badge:"Services",title:"Ce que j'offre",s1t:"Sites Surprises Personnalises",s1d:"Sites surprises d'anniversaire et romantiques sur mesure.",s2t:"Design Personnalise",s2d:"Messages personnels, photos, musique et animations.",s3t:"Hebergement en Ligne",s3d:"Partagez votre surprise via un lien unique.",s4t:"Livraison Rapide",s4d:"Recevez votre site en 24-48 heures."},
+demos:{badge:"Demos",title:"Demos Surprises",all:"Tous",birthday:"Anniversaire",romantic:"Romantique",envelope:"Enveloppe",card:"Carte",view:"Voir Demo",wa:"WhatsApp",email:"Email",back:"Retour"},
+pricing:{badge:"Forfaits",title:"Choisissez votre forfait",pop:"Populaire",cta:"Commander via WhatsApp"},
+contact:{badge:"Contact",title:"Contactez-moi",name:"Nom",email:"Email",phone:"Telephone",msg:"Message",send:"Envoyer",sent:"Message envoye!",info:"Info Contact",or:"Ou contactez-moi directement"},
+footer:{disc:"Les sites demo sont des exemples. Les sites surprises personnalises sont des services payants."},
+admin:{
+login:"Entrez le mot de passe pour acceder au panneau",loginBtn:"Connexion",wrongPw:"Mot de passe incorrect!",pwPlaceholder:"Mot de passe...",
+panelTitle:"Panneau d'Administration",panelSub:"Panneau de gestion SurpriseCraft Pro",
+tabDashboard:"Tableau de Bord",tabMessages:"Messages",tabDemos:"Demos",tabPackages:"Forfaits",tabSettings:"Parametres",logout:"Deconnexion",
+totalMsg:"Total Messages",onlineVisitors:"Visiteurs en Ligne",demoCount:"Nombre de Demos",pkgCount:"Nombre de Forfaits",
+noMessages:"Pas encore de messages.",delete:"Supprimer",
+demoSites:"Sites Demo",newBirthday:"+ Anniversaire",newRomantic:"+ Romantique",newEnvelope:"+ Enveloppe",newCard:"+ Carte",
+type:"Type",music:"Musique",none:"aucune",photos:"Photos",items:"elements",
+edit:"Modifier",preview:"Apercu",download:"Telecharger",clone:"Cloner",
+editDemo:"Modifier Demo",generalInfo:"Informations Generales",musicUrl:"URL Musique",bgCss:"CSS Arriere-plan",
+photoManage:"Gestion des Photos",addPhoto:"Ajouter Photo",photoPlaceholder:"URL ou emoji...",removePhoto:"Supprimer",
+name3lang:"Nom (3 langues)",desc3lang:"Description (3 langues)",heroTitle3:"Titre Hero (3 langues)",heroMsg3:"Message Hero (3 langues)",letterMsg3:"Message Lettre (3 langues)",
+save:"Enregistrer",cancel:"Annuler",
+editPkg:"Modifier Forfait",general:"General",nameLabel:"Nom",price:"Prix",featuredLabel:"Populaire (En vedette)",features:"Caracteristiques (une par ligne)",featPlaceholder:"Une caracteristique par ligne",
+packages:"Forfaits",feature:"Caracteristiques",
+siteSettings:"Parametres du Site",siteName:"Nom du Site",location:"Emplacement",statistics:"Statistiques",saveSettings:"Enregistrer Parametres",
+confirmDelete:"Etes-vous sur de vouloir supprimer cette demo?",deleted:"Supprime!",demoSaved:"Demo enregistree!",demoDeleted:"Demo supprimee!",demoCloned:"Demo clonee!",pkgSaved:"Forfait enregistre!",settingsSaved:"Parametres enregistres!",htmlDownloaded:"HTML telecharge!",
+newDemo:"Nouvelle Demo",descPlaceholder:"Description",titlePlaceholder:"Titre",msgPlaceholder:"Message",letterPlaceholder:"Lettre"
+}
+}
+};
+
+var DEFAULT_DEMOS=[
+{id:"b1",type:"birthday",emoji:"🎊",bg:"linear-gradient(135deg,#667eea,#764ba2)",name:{nl:"Confetti Verjaardag",en:"Confetti Birthday",fr:"Anniversaire Confetti"},desc:{nl:"Kleurrijke confetti animatie",en:"Colorful confetti animation",fr:"Animation confetti coloree"},heroTitle:{nl:"Gefeliciteerd!",en:"Happy Birthday!",fr:"Joyeux Anniversaire!"},heroMsg:{nl:"De mooiste dag is aangebroken!",en:"The most wonderful day has arrived!",fr:"Le plus beau jour est arrive!"},letterMsg:{nl:"Fijne verjaardag!",en:"Happy Birthday!",fr:"Bon anniversaire!"},music:"",photos:["https://images.unsplash.com/photo-1558636508-e0db3814bd1d?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1513151233558-d860c5398176?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1464349153159-4b3e8e2e4ef8?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1527529482837-4698179dc6ce?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1504270997636-07ddfbd48945?w=400&h=400&fit=crop"]},
+{id:"b2",type:"birthday",emoji:"🎈",bg:"linear-gradient(135deg,#f093fb,#f5576c)",name:{nl:"Ballon Feest",en:"Balloon Party",fr:"Fete de Ballons"},desc:{nl:"Stijgende ballonnen animatie",en:"Rising balloons animation",fr:"Animation ballons montants"},heroTitle:{nl:"Feest!",en:"Party Time!",fr:"C'est la fete!"},heroMsg:{nl:"Tijd om te vieren!",en:"Time to celebrate!",fr:"C'est le moment de feter!"},letterMsg:{nl:"Wat een feestdag!",en:"What a party!",fr:"Quelle fete!"},music:"",photos:["https://images.unsplash.com/photo-1527529482837-4698179dc6ce?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1504270997636-07ddfbd48945?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1513151233558-d860c5398176?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1558636508-e0db3814bd1d?w=400&h=400&fit=crop"]},
+{id:"b3",type:"birthday",emoji:"🎁",bg:"linear-gradient(135deg,#4facfe,#00f2fe)",name:{nl:"Cadeau Verrassing",en:"Gift Surprise",fr:"Cadeau Surprise"},desc:{nl:"Interactief cadeau uitpakken",en:"Interactive gift unwrapping",fr:"Deballage interactif"},heroTitle:{nl:"Surprise!",en:"Surprise!",fr:"Surprise!"},heroMsg:{nl:"Er is een cadeau voor jou!",en:"There is a gift for you!",fr:"Il y a un cadeau pour toi!"},letterMsg:{nl:"Speciaal voor jou!",en:"Especially for you!",fr:"Specialement pour toi!"},music:"",photos:["https://images.unsplash.com/photo-1549465220-1a8b9238f760?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1513151233558-d860c5398176?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1558636508-e0db3814bd1d?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1527529482837-4698179dc6ce?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1464349153159-4b3e8e2e4ef8?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=400&h=400&fit=crop"]},
+{id:"b4",type:"birthday",emoji:"🎂",bg:"linear-gradient(135deg,#fa709a,#fee140)",name:{nl:"Deluxe Verjaardag",en:"Deluxe Birthday",fr:"Anniversaire Deluxe"},desc:{nl:"Premium verjaardagspagina",en:"Premium birthday page",fr:"Page anniversaire premium"},heroTitle:{nl:"Premium Feest!",en:"Premium Party!",fr:"Fete Premium!"},heroMsg:{nl:"Een luxe verjaardag!",en:"A luxury birthday!",fr:"Un anniversaire de luxe!"},letterMsg:{nl:"Je verdient het beste!",en:"You deserve the best!",fr:"Tu merites le meilleur!"},music:"",photos:["https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1464349153159-4b3e8e2e4ef8?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1504270997636-07ddfbd48945?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1527529482837-4698179dc6ce?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1549465220-1a8b9238f760?w=400&h=400&fit=crop"]},
+{id:"b5",type:"birthday",emoji:"🎵",bg:"linear-gradient(135deg,#a18cd1,#fbc2eb)",name:{nl:"Muzikale Verrassing",en:"Musical Surprise",fr:"Surprise Musicale"},desc:{nl:"Verjaardagslied met animaties",en:"Birthday song with animations",fr:"Chanson d'anniversaire"},heroTitle:{nl:"Muziek!",en:"Music!",fr:"Musique!"},heroMsg:{nl:"Een speciaal liedje voor jou!",en:"A special song for you!",fr:"Une chanson speciale!"},letterMsg:{nl:"Dans en geniet!",en:"Dance and enjoy!",fr:"Danse et profite!"},music:"",photos:["https://images.unsplash.com/photo-1513151233558-d860c5398176?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1504270997636-07ddfbd48945?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1558636508-e0db3814bd1d?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1527529482837-4698179dc6ce?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1464349153159-4b3e8e2e4ef8?w=400&h=400&fit=crop"]},
+{id:"b6",type:"birthday",emoji:"⭐",bg:"linear-gradient(135deg,#0c3483,#a2b6df)",name:{nl:"Sterren Feest",en:"Star Party",fr:"Fete Etoilee"},desc:{nl:"Nachtelijke sterren animatie",en:"Night sky animation",fr:"Animation etoiles"},heroTitle:{nl:"Sterren!",en:"Stars!",fr:"Etoiles!"},heroMsg:{nl:"Je schittert als een ster!",en:"You shine like a star!",fr:"Tu brilles comme une etoile!"},letterMsg:{nl:"Stralend als altijd!",en:"Shining as always!",fr:"Brillant comme toujours!"},music:"",photos:["https://images.unsplash.com/photo-1558636508-e0db3814bd1d?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1513151233558-d860c5398176?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1527529482837-4698179dc6ce?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1504270997636-07ddfbd48945?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1464349153159-4b3e8e2e4ef8?w=400&h=400&fit=crop"]},
+{id:"r1",type:"romantic",emoji:"💌",bg:"linear-gradient(135deg,#f5576c,#ff6b9d)",name:{nl:"Liefdesbrief",en:"Love Letter",fr:"Lettre d'Amour"},desc:{nl:"Romantische brief met hartjes",en:"Romantic letter with hearts",fr:"Lettre romantique"},heroTitle:{nl:"Lieve Schat",en:"My Dear Love",fr:"Mon Cher Amour"},heroMsg:{nl:"Elk moment met jou is een droom.",en:"Every moment with you is a dream.",fr:"Chaque moment avec toi est un reve."},letterMsg:{nl:"Ik hou van je, altijd.",en:"I love you, always.",fr:"Je t'aime, toujours."},music:"",photos:["https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1529634597503-139d3726fed5?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1522673607200-164d1b6ce486?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1545232979-8bf68ee9b1af?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1474552226712-ac0f0961a954?w=400&h=400&fit=crop"]},
+{id:"r2",type:"romantic",emoji:"🌹",bg:"linear-gradient(135deg,#ee9ca7,#ffdde1)",name:{nl:"Rozen Tuin",en:"Rose Garden",fr:"Jardin de Roses"},desc:{nl:"Vallende rozenblaadjes",en:"Falling rose petals",fr:"Petales de roses"},heroTitle:{nl:"Mijn Roos",en:"My Rose",fr:"Ma Rose"},heroMsg:{nl:"Zo mooi als een roos.",en:"As beautiful as a rose.",fr:"Aussi belle qu'une rose."},letterMsg:{nl:"Elke roos doet me aan jou denken.",en:"Every rose reminds me of you.",fr:"Chaque rose me rappelle toi."},music:"",photos:["https://images.unsplash.com/photo-1490750967868-88aa4f44baee?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1529634597503-139d3726fed5?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1474552226712-ac0f0961a954?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1522673607200-164d1b6ce486?w=400&h=400&fit=crop"]},
+{id:"r3",type:"romantic",emoji:"💖",bg:"linear-gradient(135deg,#d63384,#e91e8b)",name:{nl:"Hart Canvas",en:"Heart Canvas",fr:"Coeur Canvas"},desc:{nl:"Hart partikel animatie",en:"Heart particle animation",fr:"Animation particules coeur"},heroTitle:{nl:"Mijn Hart",en:"My Heart",fr:"Mon Coeur"},heroMsg:{nl:"Mijn hart klopt voor jou.",en:"My heart beats for you.",fr:"Mon coeur bat pour toi."},letterMsg:{nl:"Je bent mijn alles.",en:"You are my everything.",fr:"Tu es mon tout."},music:"",photos:["https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1522673607200-164d1b6ce486?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1474552226712-ac0f0961a954?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1529634597503-139d3726fed5?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1545232979-8bf68ee9b1af?w=400&h=400&fit=crop"]},
+{id:"r4",type:"romantic",emoji:"🌙",bg:"linear-gradient(135deg,#0f0c29,#302b63)",name:{nl:"Sterrennacht",en:"Starry Night",fr:"Nuit Etoilee"},desc:{nl:"Romantische sterrenhemel",en:"Romantic starry sky",fr:"Ciel etoile romantique"},heroTitle:{nl:"Sterrenhemel",en:"Starry Sky",fr:"Ciel Etoile"},heroMsg:{nl:"Onder de sterren met jou.",en:"Under the stars with you.",fr:"Sous les etoiles avec toi."},letterMsg:{nl:"Jij bent mijn mooiste ster.",en:"You are my brightest star.",fr:"Tu es mon etoile la plus brillante."},music:"",photos:["https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1474552226712-ac0f0961a954?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1529634597503-139d3726fed5?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1522673607200-164d1b6ce486?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1545232979-8bf68ee9b1af?w=400&h=400&fit=crop"]},
+{id:"r5",type:"romantic",emoji:"💍",bg:"linear-gradient(135deg,#b721ff,#21d4fd)",name:{nl:"Aanzoek Pagina",en:"Proposal Page",fr:"Page de Demande"},desc:{nl:"Verrassende aanzoek website",en:"Surprising proposal website",fr:"Site de demande surprenant"},heroTitle:{nl:"Wil je?",en:"Will You?",fr:"Veux-tu?"},heroMsg:{nl:"Ik heb een belangrijke vraag...",en:"I have an important question...",fr:"J'ai une question importante..."},letterMsg:{nl:"Wil je de rest van je leven met mij delen?",en:"Will you share the rest of your life with me?",fr:"Veux-tu partager le reste de ta vie avec moi?"},music:"",photos:["https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1529634597503-139d3726fed5?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1474552226712-ac0f0961a954?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1522673607200-164d1b6ce486?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1545232979-8bf68ee9b1af?w=400&h=400&fit=crop"]},
+{id:"r6",type:"romantic",emoji:"🕯️",bg:"linear-gradient(135deg,#f12711,#f5af19)",name:{nl:"Kaarslicht",en:"Candlelight",fr:"Chandelles"},desc:{nl:"Romantische kaarslicht sfeer",en:"Romantic candlelight",fr:"Ambiance chandelles"},heroTitle:{nl:"Kaarslicht",en:"Candlelight",fr:"Chandelles"},heroMsg:{nl:"Bij kaarslicht met jou.",en:"By candlelight with you.",fr:"A la lueur des bougies."},letterMsg:{nl:"De warmte van jouw liefde.",en:"The warmth of your love.",fr:"La chaleur de ton amour."},music:"",photos:["https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1474552226712-ac0f0961a954?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1545232979-8bf68ee9b1af?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1529634597503-139d3726fed5?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1522673607200-164d1b6ce486?w=400&h=400&fit=crop"]},
+{id:"e1",type:"envelope",emoji:"💌",bg:"linear-gradient(135deg,#ff9a9e,#fecfef)",name:{nl:"Romantische Envelop",en:"Romantic Envelope",fr:"Enveloppe Romantique"},desc:{nl:"Interactieve envelop met Ja/Nee knoppen",en:"Interactive envelope with Yes/No buttons",fr:"Enveloppe interactive avec boutons Oui/Non"},heroTitle:{nl:"Een speciaal bericht voor jou...",en:"A special message for you...",fr:"Un message special pour toi..."},heroMsg:{nl:"Wil je met mij uitgaan? Elke seconde zonder jou voelt als een eeuwigheid. Je glimlach verlicht mijn wereld.",en:"Will you go out with me? Every second without you feels like an eternity. Your smile lights up my world.",fr:"Veux-tu sortir avec moi? Chaque seconde sans toi est une eternite. Ton sourire illumine mon monde."},letterMsg:{nl:"Je hebt me zo gelukkig gemaakt!",en:"You made me so happy!",fr:"Tu m'as rendu si heureux!"},music:"",photos:["https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1529634597503-139d3726fed5?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1474552226712-ac0f0961a954?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1522673607200-164d1b6ce486?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1545232979-8bf68ee9b1af?w=400&h=400&fit=crop"]},
+{id:"c1",type:"card",emoji:"🎂",bg:"linear-gradient(135deg,#f6d365,#fda085)",name:{nl:"Verjaardagskaart",en:"Birthday Card",fr:"Carte d'Anniversaire"},desc:{nl:"Animatie openende verjaardagskaart",en:"Animated opening birthday card",fr:"Carte d'anniversaire animee"},heroTitle:{nl:"Gefeliciteerd met je verjaardag!",en:"Happy Birthday to You!",fr:"Joyeux Anniversaire!"},heroMsg:{nl:"Vandaag is jouw dag! Laat de wereld weten hoe bijzonder je bent. Geniet van elk moment en maak er een onvergetelijke dag van!",en:"Today is your day! Let the world know how special you are. Enjoy every moment and make it an unforgettable day!",fr:"Aujourd'hui c'est ton jour! Profite de chaque moment et fais-en une journee inoubliable!"},letterMsg:{nl:"Veel liefde en geluk op je speciale dag!",en:"Much love and happiness on your special day!",fr:"Beaucoup d'amour et de bonheur en ce jour special!"},music:"",photos:["https://images.unsplash.com/photo-1558636508-e0db3814bd1d?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1513151233558-d860c5398176?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1527529482837-4698179dc6ce?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1504270997636-07ddfbd48945?w=400&h=400&fit=crop","https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=400&h=400&fit=crop"]}
+];
+
+var DEFAULT_PACKAGES=[
+{name:{nl:"Starter Verrassing",en:"Starter Surprise",fr:"Starter Surprise"},price:"\u20ac50\u201380",featured:false,features:{nl:["Basis verrassingssite","Aangepast bericht","Eenvoudige animatie","Mobiel vriendelijk"],en:["Basic surprise site","Custom message","Simple animation","Mobile friendly"],fr:["Site surprise basique","Message personnalise","Animation simple","Compatible mobile"]}},
+{name:{nl:"Premium Verrassing",en:"Premium Surprise",fr:"Premium Surprise"},price:"\u20ac100\u2013200",featured:true,features:{nl:["Muziek integratie","Foto galerij","Geavanceerde animaties","Deelbare link","Aangepast bericht"],en:["Music integration","Photo gallery","Advanced animations","Shareable link","Custom message"],fr:["Integration musicale","Galerie photos","Animations avancees","Lien partageable","Message personnalise"]}},
+{name:{nl:"Ultimate Verrassing",en:"Ultimate Surprise",fr:"Ultimate Surprise"},price:"\u20ac300+",featured:false,features:{nl:["Volledig custom website","Professioneel ontwerp","Hosting inbegrepen","Unieke link","Onbeperkte revisies"],en:["Fully custom website","Professional design","Hosting included","Unique link","Unlimited revisions"],fr:["Site entierement personnalise","Design professionnel","Hebergement inclus","Lien unique","Revisions illimitees"]}}
+];
+
+var DEFAULT_CONFIG={siteName:"SurpriseCraft Pro",email:"info@surprisecraft.pro",whatsapp:"+31 6 00000000",location:"Netherlands",stats:{s1:"200+",s2:"150+",s3:"5+"}};
+
+/* ===== DEMO HTML GENERATORS ===== */
+function genBirthdayHTML(d,lang){
+var n=d.name[lang]||d.name.en||"Birthday";
+var ht=d.heroTitle[lang]||d.heroTitle.en||"Happy Birthday!";
+var hm=d.heroMsg[lang]||d.heroMsg.en||"Wonderful day!";
+var lm=d.letterMsg[lang]||d.letterMsg.en||"Happy Birthday!";
+var photos=d.photos||[];
+var h="<!DOCTYPE html><html><head>";
+h+="<meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1.0\">";
+h+="<link href=\"https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Inter:wght@300;400;500;600&display=swap\" rel=\"stylesheet\">";
+h+="<title>"+n+"</title><style>";
+h+="*{margin:0;padding:0;box-sizing:border-box}";
+h+="html{scroll-behavior:smooth}";
+h+="body{font-family:'Inter',sans-serif;background:#0a0a1a;color:#fff;min-height:100vh;overflow-x:hidden}";
+h+=".hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;";
+h+="padding:40px 20px;position:relative;overflow:hidden;background:radial-gradient(ellipse at 30% 50%,rgba(99,102,241,.15),transparent 60%),";
+h+="radial-gradient(ellipse at 70% 50%,rgba(244,114,182,.12),transparent 60%),#0a0a1a}";
+h+=".hero::before{content:'';position:absolute;inset:0;background:url(\"data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E\")}";
+h+=".hero-emoji{font-size:clamp(80px,15vw,140px);margin-bottom:24px;animation:float 3s ease-in-out infinite;filter:drop-shadow(0 20px 40px rgba(244,114,182,.3))}";
+h+="@keyframes float{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-20px) rotate(3deg)}}";
+h+=".hero h1{font-family:'Playfair Display',serif;font-size:clamp(36px,8vw,72px);font-weight:900;margin-bottom:20px;";
+h+="background:linear-gradient(135deg,#fff,#f8b4d9,#c084fc,#818cf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;";
+h+="background-size:200% 200%;animation:shimmer 4s ease infinite;line-height:1.2}";
+h+="@keyframes shimmer{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}";
+h+=".hero p{font-size:clamp(16px,3vw,20px);color:rgba(255,255,255,.7);max-width:600px;line-height:1.8;margin-bottom:40px;font-weight:300}";
+h+=".scroll-hint{animation:bounce 2s infinite;font-size:24px;opacity:.5;cursor:pointer}";
+h+="@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(12px)}}";
+h+=".section{padding:80px 20px;position:relative}";
+h+=".section-title{font-family:'Playfair Display',serif;font-size:clamp(24px,5vw,40px);text-align:center;margin-bottom:48px;";
+h+="background:linear-gradient(135deg,#f8b4d9,#c084fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent}";
+h+=".gallery-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;max-width:900px;margin:0 auto}";
+h+=".gallery-item{aspect-ratio:1;border-radius:16px;overflow:hidden;position:relative;cursor:pointer;";
+h+="box-shadow:0 8px 32px rgba(0,0,0,.3);transition:all .4s cubic-bezier(.4,0,.2,1)}";
+h+=".gallery-item:hover{transform:translateY(-8px) scale(1.02);box-shadow:0 20px 60px rgba(244,114,182,.2)}";
+h+=".gallery-item img{width:100%;height:100%;object-fit:cover;transition:transform .6s}";
+h+=".gallery-item:hover img{transform:scale(1.1)}";
+h+=".gallery-item .overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.6),transparent);opacity:0;transition:opacity .3s}";
+h+=".gallery-item:hover .overlay{opacity:1}";
+h+=".message-card{max-width:700px;margin:0 auto;padding:48px;text-align:center;";
+h+="background:linear-gradient(135deg,rgba(255,255,255,.05),rgba(255,255,255,.02));";
+h+="backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.08);border-radius:24px;";
+h+="box-shadow:0 24px 64px rgba(0,0,0,.3)}";
+h+=".message-card h2{font-family:'Playfair Display',serif;font-size:28px;margin-bottom:20px;color:#f8b4d9}";
+h+=".message-card p{font-size:18px;line-height:2;color:rgba(255,255,255,.8);font-style:italic}";
+h+=".cta-section{text-align:center;padding:60px 20px}";
+h+=".cta-btn{display:inline-flex;align-items:center;gap:10px;padding:18px 44px;background:linear-gradient(135deg,#25d366,#128c7e);";
+h+="color:#fff;text-decoration:none;border-radius:50px;font-size:16px;font-weight:600;";
+h+="box-shadow:0 8px 32px rgba(37,211,102,.3);transition:all .3s}";
+h+=".cta-btn:hover{transform:translateY(-3px);box-shadow:0 12px 40px rgba(37,211,102,.4)}";
+h+=".confetti{position:fixed;top:-10px;pointer-events:none;z-index:100}";
+h+=".confetti-piece{position:fixed;width:10px;height:10px;top:-20px;animation:confetti-fall linear forwards}";
+h+="@keyframes confetti-fall{to{transform:translateY(110vh) rotate(720deg);opacity:0}}";
+h+=".particle{position:fixed;border-radius:50%;pointer-events:none;animation:particle-float linear infinite}";
+h+="@keyframes particle-float{0%{opacity:0;transform:translateY(0)}10%{opacity:1}90%{opacity:.3}100%{opacity:0;transform:translateY(-100vh)}}";
+if(d.music){h+="audio{display:none}";}
+h+="@media(max-width:600px){.gallery-grid{grid-template-columns:repeat(2,1fr);gap:10px}.message-card{padding:28px 20px}}";
+h+="</style></head><body>";
+if(d.music){h+="<audio autoplay loop><source src=\""+d.music+"\" type=\"audio/mpeg\"></audio>";}
+h+="<div class=\"hero\"><div class=\"hero-emoji\">"+d.emoji+"</div>";
+h+="<h1>"+ht+"</h1><p>"+hm+"</p>";
+h+="<div class=\"scroll-hint\" onclick=\"document.querySelector('.section').scrollIntoView({behavior:'smooth'})\">↓</div></div>";
+h+="<div class=\"section\"><h2 class=\"section-title\">✨ Memories ✨</h2><div class=\"gallery-grid\">";
+for(var i=0;i<photos.length;i++){
+var p=photos[i];
+if(p.startsWith("http")){h+="<div class=\"gallery-item\"><img src=\""+p+"\" alt=\"photo\" loading=\"lazy\"><div class=\"overlay\"></div></div>";}
+else{h+="<div class=\"gallery-item\" style=\"display:flex;align-items:center;justify-content:center;font-size:56px;background:linear-gradient(135deg,rgba(244,114,182,.15),rgba(129,140,248,.15))\">"+p+"</div>";}
+}
+h+="</div></div>";
+h+="<div class=\"section\"><div class=\"message-card\"><h2>💌 A Special Message</h2><p>"+lm+"</p></div></div>";
+h+="<div class=\"cta-section\"><a class=\"cta-btn\" href=\"https://wa.me/31600000000\">💬 WhatsApp</a></div>";
+h+="<scr"+"ipt>";
+h+="var colors=['#f472b6','#818cf8','#a78bfa','#fbbf24','#34d399','#f97316','#06b6d4'];";
+h+="for(var i=0;i<60;i++){var c=document.createElement('div');c.className='confetti-piece';";
+h+="c.style.left=Math.random()*100+'vw';c.style.width=(6+Math.random()*8)+'px';c.style.height=(6+Math.random()*8)+'px';";
+h+="c.style.background=colors[Math.floor(Math.random()*colors.length)];";
+h+="c.style.borderRadius=Math.random()>.5?'50%':'2px';";
+h+="c.style.animationDuration=(3+Math.random()*5)+'s';c.style.animationDelay=Math.random()*8+'s';";
+h+="document.body.appendChild(c)}";
+h+="for(var i=0;i<15;i++){var p=document.createElement('div');p.className='particle';";
+h+="p.style.left=Math.random()*100+'vw';p.style.bottom='-10px';";
+h+="p.style.width=p.style.height=(2+Math.random()*4)+'px';";
+h+="p.style.background='rgba(244,114,182,'+(0.3+Math.random()*0.5)+')';";
+h+="p.style.animationDuration=(6+Math.random()*10)+'s';p.style.animationDelay=Math.random()*8+'s';";
+h+="document.body.appendChild(p)}";
+h+="document.addEventListener('click',function(){try{document.querySelector('audio').play()}catch(e){}},{once:true});";
+h+="</scr"+"ipt></body></html>";
+return h;
+}
+
+function genRomanticHTML(d,lang){
+var n=d.name[lang]||d.name.en||"Love";
+var ht=d.heroTitle[lang]||d.heroTitle.en||"My Love";
+var hm=d.heroMsg[lang]||d.heroMsg.en||"You are my everything.";
+var lm=d.letterMsg[lang]||d.letterMsg.en||"I love you.";
+var photos=d.photos||[];
+var h="<!DOCTYPE html><html><head>";
+h+="<meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1.0\">";
+h+="<link href=\"https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&display=swap\" rel=\"stylesheet\">";
+h+="<title>"+n+"</title><style>";
+h+="*{margin:0;padding:0;box-sizing:border-box}";
+h+="html{scroll-behavior:smooth}";
+h+="body{font-family:'Cormorant Garamond',serif;background:#0d0208;color:#fff;min-height:100vh;overflow-x:hidden}";
+h+=".hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;";
+h+="padding:40px 20px;position:relative;overflow:hidden;";
+h+="background:radial-gradient(ellipse at 50% 30%,rgba(190,24,93,.12),transparent 60%),";
+h+="radial-gradient(ellipse at 20% 80%,rgba(157,23,77,.08),transparent 50%),";
+h+="radial-gradient(ellipse at 80% 70%,rgba(219,39,119,.06),transparent 50%),#0d0208}";
+h+=".hero-heart{font-size:clamp(60px,12vw,100px);animation:heartbeat 1.4s ease-in-out infinite;";
+h+="filter:drop-shadow(0 0 40px rgba(244,63,94,.4));margin-bottom:30px}";
+h+="@keyframes heartbeat{0%{transform:scale(1)}14%{transform:scale(1.15)}28%{transform:scale(1)}42%{transform:scale(1.1)}70%{transform:scale(1)}}";
+h+=".hero h1{font-family:'Playfair Display',serif;font-size:clamp(32px,8vw,64px);font-weight:900;margin-bottom:24px;";
+h+="background:linear-gradient(135deg,#fda4af,#fb7185,#f43f5e,#e11d48);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1.3}";
+h+=".hero p{font-size:clamp(17px,3vw,22px);color:rgba(253,164,175,.7);max-width:550px;line-height:2;font-style:italic;letter-spacing:.3px}";
+h+=".divider{width:100px;height:1px;background:linear-gradient(90deg,transparent,#f43f5e,transparent);margin:60px auto}";
+h+=".letter{max-width:600px;margin:0 auto 60px;padding:48px 40px;position:relative;";
+h+="background:linear-gradient(135deg,rgba(255,255,255,.04),rgba(255,255,255,.01));";
+h+="backdrop-filter:blur(20px);border:1px solid rgba(244,63,94,.15);border-radius:24px;text-align:center;";
+h+="box-shadow:0 24px 80px rgba(190,24,93,.15),inset 0 1px 0 rgba(255,255,255,.05)}";
+h+=".letter::before{content:'\\201C';position:absolute;top:16px;left:24px;font-size:60px;color:rgba(244,63,94,.2);font-family:'Playfair Display',serif}";
+h+=".letter h2{font-family:'Playfair Display',serif;font-size:26px;color:#fb7185;margin-bottom:24px;font-weight:400}";
+h+=".letter p{font-size:19px;line-height:2.2;color:rgba(253,164,175,.85);font-style:italic}";
+h+=".photos-section{padding:80px 20px;text-align:center}";
+h+=".photos-section h2{font-family:'Playfair Display',serif;font-size:clamp(24px,5vw,36px);margin-bottom:40px;color:#fda4af;font-weight:400}";
+h+=".photo-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;max-width:800px;margin:0 auto}";
+h+=".photo-item{aspect-ratio:1;border-radius:16px;overflow:hidden;position:relative;";
+h+="box-shadow:0 8px 32px rgba(0,0,0,.4);transition:all .5s cubic-bezier(.4,0,.2,1)}";
+h+=".photo-item:hover{transform:translateY(-10px) rotate(-1deg);box-shadow:0 24px 64px rgba(244,63,94,.2)}";
+h+=".photo-item img{width:100%;height:100%;object-fit:cover;transition:transform .6s;filter:brightness(.9) contrast(1.05)}";
+h+=".photo-item:hover img{transform:scale(1.1);filter:brightness(1)}";
+h+=".photo-item::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,rgba(13,2,8,.5),transparent 50%);pointer-events:none}";
+h+=".cta-section{text-align:center;padding:40px 20px 80px}";
+h+=".cta-btn{display:inline-flex;align-items:center;gap:10px;padding:18px 44px;";
+h+="background:linear-gradient(135deg,#e11d48,#be185d);color:#fff;text-decoration:none;border-radius:50px;";
+h+="font-size:17px;font-weight:600;font-family:'Inter',sans-serif;";
+h+="box-shadow:0 8px 32px rgba(225,29,72,.3);transition:all .3s}";
+h+=".cta-btn:hover{transform:translateY(-3px);box-shadow:0 16px 48px rgba(225,29,72,.4)}";
+h+=".float-heart{position:fixed;bottom:-60px;opacity:0;animation:floatH linear infinite;pointer-events:none;z-index:0}";
+h+="@keyframes floatH{0%{opacity:0;transform:translateY(0) scale(.5) rotate(0deg)}10%{opacity:.5}50%{transform:translateY(-55vh) scale(1) rotate(15deg)}90%{opacity:.1}100%{opacity:0;transform:translateY(-110vh) scale(.8) rotate(-10deg)}}";
+if(d.music){h+="audio{display:none}";}
+h+="@media(max-width:600px){.photo-grid{grid-template-columns:repeat(2,1fr);gap:10px}.letter{padding:32px 24px;margin:0 16px 60px}}";
+h+="</style></head><body>";
+if(d.music){h+="<audio autoplay loop><source src=\""+d.music+"\" type=\"audio/mpeg\"></audio>";}
+h+="<div class=\"hero\"><div class=\"hero-heart\">"+d.emoji+"</div>";
+h+="<h1>"+ht+"</h1><p>"+hm+"</p></div>";
+h+="<div class=\"divider\"></div>";
+h+="<div class=\"section\" style=\"padding:20px 20px 80px\"><div class=\"letter\"><h2>Love Letter</h2><p>"+lm+"</p></div></div>";
+h+="<div class=\"photos-section\"><h2>Our Memories</h2><div class=\"photo-grid\">";
+for(var i=0;i<photos.length;i++){
+var p=photos[i];
+if(p.startsWith("http")){h+="<div class=\"photo-item\"><img src=\""+p+"\" alt=\"\" loading=\"lazy\"></div>";}
+else{h+="<div class=\"photo-item\" style=\"display:flex;align-items:center;justify-content:center;font-size:48px;background:linear-gradient(135deg,rgba(244,63,94,.1),rgba(190,24,93,.1))\">"+p+"</div>";}
+}
+h+="</div></div>";
+h+="<div class=\"cta-section\"><a class=\"cta-btn\" href=\"https://wa.me/31600000000\">💬 WhatsApp</a></div>";
+h+="<scr"+"ipt>";
+h+="var he=['❤️','💕','💖','💗','🌹','✨'];";
+h+="for(var i=0;i<20;i++){var fh=document.createElement('div');fh.className='float-heart';";
+h+="fh.textContent=he[Math.floor(Math.random()*he.length)];";
+h+="fh.style.left=Math.random()*100+'vw';fh.style.fontSize=(12+Math.random()*18)+'px';";
+h+="fh.style.animationDuration=(8+Math.random()*12)+'s';fh.style.animationDelay=Math.random()*10+'s';";
+h+="document.body.appendChild(fh)}";
+h+="document.addEventListener('click',function(){try{document.querySelector('audio').play()}catch(e){}},{once:true});";
+h+="</scr"+"ipt></body></html>";
+return h;
+}
+
+function genEnvelopeHTML(d,lang){
+var n=d.name[lang]||d.name.en||"Envelope";
+var ht=d.heroTitle[lang]||d.heroTitle.en||"A special message...";
+var hm=d.heroMsg[lang]||d.heroMsg.en||"Will you go out with me?";
+var lm=d.letterMsg[lang]||d.letterMsg.en||"You made me so happy!";
+var photos=d.photos||[];
+var yesT={nl:"Ja 💖",en:"Yes 💖",fr:"Oui 💖"};
+var noT={nl:"Nee",en:"No",fr:"Non"};
+var celebT={nl:"Je hebt me zo gelukkig gemaakt!",en:"You made me so happy!",fr:"Tu m'as rendu si heureux!"};
+var clickT={nl:"Tik op het hart...",en:"Tap the heart...",fr:"Touchez le coeur..."};
+var h="<!DOCTYPE html><html><head>";
+h+="<meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1.0\">";
+h+="<link href=\"https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;600&display=swap\" rel=\"stylesheet\">";
+h+="<title>"+n+"</title><style>";
+h+="*{margin:0;padding:0;box-sizing:border-box}";
+h+="body{font-family:'Inter',sans-serif;min-height:100vh;overflow-x:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;";
+h+="background:#0d0208;position:relative}";
+h+=".bg-glow{position:fixed;inset:0;pointer-events:none;z-index:0;";
+h+="background:radial-gradient(ellipse at 50% 50%,rgba(190,24,93,.15),transparent 60%),";
+h+="radial-gradient(ellipse at 20% 80%,rgba(244,63,94,.08),transparent 40%),";
+h+="radial-gradient(ellipse at 80% 20%,rgba(219,39,119,.06),transparent 40%)}";
+h+=".hint{position:fixed;bottom:80px;color:rgba(253,164,175,.5);font-size:14px;letter-spacing:2px;";
+h+="text-transform:uppercase;animation:hintPulse 2s ease infinite;z-index:5}";
+h+="@keyframes hintPulse{0%,100%{opacity:.3}50%{opacity:.8}}";
+h+=".envelope-scene{position:relative;z-index:10;cursor:pointer;margin:20px}";
+h+=".envelope{width:clamp(280px,80vw,380px);height:clamp(200px,55vw,260px);position:relative;";
+h+="background:linear-gradient(180deg,#1a1a2e,#16213e);border-radius:0 0 16px 16px;";
+h+="box-shadow:0 20px 60px rgba(0,0,0,.5),0 0 80px rgba(190,24,93,.1);transition:all .6s}";
+h+=".envelope-flap{position:absolute;top:0;left:0;width:0;height:0;z-index:3;";
+h+="border-left:calc(clamp(280px,80vw,380px)/2) solid transparent;";
+h+="border-right:calc(clamp(280px,80vw,380px)/2) solid transparent;";
+h+="border-top:clamp(120px,35vw,170px) solid #0f3460;transform-origin:top;transition:transform .8s cubic-bezier(.4,0,.2,1)}";
+h+=".envelope.open .envelope-flap{transform:rotateX(180deg)}";
+h+=".envelope-body{position:absolute;bottom:0;left:0;right:0;height:55%;";
+h+="background:linear-gradient(135deg,#1a1a2e,#16213e);border-radius:0 0 16px 16px;z-index:4;";
+h+="border-top:2px solid rgba(244,63,94,.15)}";
+h+=".heart-seal{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:clamp(36px,8vw,50px);z-index:5;";
+h+="animation:heartPulse 1.4s ease-in-out infinite;cursor:pointer;filter:drop-shadow(0 0 20px rgba(244,63,94,.6))}";
+h+="@keyframes heartPulse{0%{transform:translate(-50%,-50%) scale(1)}14%{transform:translate(-50%,-50%) scale(1.2)}28%{transform:translate(-50%,-50%) scale(1)}42%{transform:translate(-50%,-50%) scale(1.15)}70%{transform:translate(-50%,-50%) scale(1)}}";
+h+=".letter-card{position:absolute;bottom:30px;left:50%;transform:translateX(-50%);width:85%;";
+h+="background:linear-gradient(135deg,rgba(255,255,255,.06),rgba(255,255,255,.02));backdrop-filter:blur(20px);";
+h+="border:1px solid rgba(244,63,94,.15);border-radius:16px;padding:clamp(20px,4vw,32px);";
+h+="text-align:center;transition:all .8s cubic-bezier(.4,0,.2,1);z-index:2;opacity:0;pointer-events:none}";
+h+=".envelope.open .letter-card{transform:translateX(-50%) translateY(calc(-100% - 40px));opacity:1;pointer-events:auto}";
+h+=".letter-card h2{font-family:'Playfair Display',serif;font-size:clamp(18px,4vw,24px);color:#fda4af;margin-bottom:12px;font-weight:400}";
+h+=".letter-card p{font-size:clamp(13px,2.5vw,15px);color:rgba(253,164,175,.8);line-height:1.8;margin-bottom:20px;font-style:italic}";
+h+=".btn-row{display:flex;gap:16px;justify-content:center;align-items:center;position:relative;min-height:50px}";
+h+=".btn-yes{padding:14px 36px;background:linear-gradient(135deg,#e11d48,#be185d);color:#fff;border:none;border-radius:50px;";
+h+="font-size:16px;font-weight:600;cursor:pointer;transition:all .3s;";
+h+="box-shadow:0 8px 32px rgba(225,29,72,.3);position:relative;z-index:10}";
+h+=".btn-yes:hover{transform:scale(1.08);box-shadow:0 12px 40px rgba(225,29,72,.5)}";
+h+=".btn-no{padding:14px 36px;background:rgba(255,255,255,.05);color:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.1);";
+h+="border-radius:50px;font-size:16px;cursor:pointer;transition:all .2s;position:absolute;z-index:9}";
+h+=".celebration{display:none;position:fixed;inset:0;z-index:1000;";
+h+="background:radial-gradient(ellipse at center,#1a0a1e,#0d0208);";
+h+="flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px}";
+h+=".celebration.show{display:flex}";
+h+=".celebration .big-heart{font-size:clamp(80px,15vw,120px);animation:heartPulse 1.4s ease-in-out infinite;";
+h+="filter:drop-shadow(0 0 40px rgba(244,63,94,.5));margin-bottom:24px}";
+h+=".celebration h1{font-family:'Playfair Display',serif;font-size:clamp(28px,6vw,48px);";
+h+="background:linear-gradient(135deg,#fda4af,#fb7185,#f43f5e);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:16px}";
+h+=".celebration p{font-size:clamp(15px,3vw,20px);color:rgba(253,164,175,.7);font-style:italic;max-width:500px}";
+h+=".photos-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:24px;max-width:360px}";
+h+=".photos-row img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px;border:2px solid rgba(244,63,94,.3);";
+h+="box-shadow:0 4px 20px rgba(0,0,0,.3);transition:transform .3s}";
+h+=".photos-row img:hover{transform:scale(1.05)}";
+h+=".confetti-piece{position:fixed;top:-20px;pointer-events:none;z-index:1001;animation:cfall linear forwards}";
+h+="@keyframes cfall{to{transform:translateY(110vh) rotate(720deg);opacity:0}}";
+h+=".float-heart{position:fixed;bottom:-60px;opacity:0;animation:fltH linear infinite;pointer-events:none;z-index:0}";
+h+="@keyframes fltH{0%{opacity:0;transform:translateY(0) scale(.5)}10%{opacity:.4}90%{opacity:.05}100%{opacity:0;transform:translateY(-110vh) scale(1)}}";
+h+="</style></head><body>";
+h+="<div class=\"bg-glow\"></div>";
+h+="<div class=\"hint\">"+(clickT[lang]||clickT.en)+"</div>";
+h+="<div class=\"envelope-scene\" id=\"scene\"><div class=\"envelope\" id=\"env\">";
+h+="<div class=\"envelope-flap\"></div><div class=\"heart-seal\" id=\"seal\">❤️</div>";
+h+="<div class=\"letter-card\" id=\"letter\"><h2>"+ht+"</h2><p>"+hm+"</p>";
+h+="<div class=\"btn-row\"><button class=\"btn-yes\" id=\"yesBtn\">"+(yesT[lang]||yesT.en)+"</button>";
+h+="<button class=\"btn-no\" id=\"noBtn\">"+(noT[lang]||noT.en)+"</button></div></div>";
+h+="<div class=\"envelope-body\"></div></div></div>";
+h+="<div class=\"celebration\" id=\"celeb\"><div class=\"big-heart\">💖</div>";
+h+="<h1>"+(celebT[lang]||celebT.en)+"</h1>";
+h+="<p>"+lm+"</p>";
+var photoUrls=photos.filter(function(p){return p.startsWith("http")});
+if(photoUrls.length>0){
+h+="<div class=\"photos-row\">";
+for(var i=0;i<Math.min(photoUrls.length,6);i++){h+="<img src=\""+photoUrls[i]+"\" alt=\"\" loading=\"lazy\">";}
+h+="</div>";
+}
+h+="</div>";
+if(d.music){h+="<audio id=\"bgm\" loop><source src=\""+d.music+"\" type=\"audio/mpeg\"></audio>";}
+h+="<scr"+"ipt>";
+h+="var he=['❤️','💕','💖','💗','🌹','✨'];";
+h+="for(var i=0;i<15;i++){var fh=document.createElement('div');fh.className='float-heart';";
+h+="fh.textContent=he[Math.floor(Math.random()*he.length)];";
+h+="fh.style.left=Math.random()*100+'vw';fh.style.fontSize=(10+Math.random()*16)+'px';";
+h+="fh.style.animationDuration=(8+Math.random()*12)+'s';fh.style.animationDelay=Math.random()*10+'s';";
+h+="document.body.appendChild(fh)}";
+h+="var env=document.getElementById('env'),opened=false;";
+h+="document.getElementById('seal').addEventListener('click',function(ev){ev.stopPropagation();env.classList.toggle('open');opened=!opened;";
+h+="document.querySelector('.hint').style.opacity='0';";
+h+="if(opened){try{var a=document.getElementById('bgm');if(a)a.play()}catch(e){}}});";
+h+="var noBtn=document.getElementById('noBtn'),noCount=0;";
+h+="function moveNo(){noCount++;var bw=window.innerWidth-130,bh=window.innerHeight-60;";
+h+="noBtn.style.position='fixed';noBtn.style.left=Math.max(10,Math.random()*bw)+'px';";
+h+="noBtn.style.top=Math.max(10,Math.random()*bh)+'px';noBtn.style.zIndex='50';";
+h+="if(noCount>3){noBtn.style.fontSize=(Math.max(8,16-noCount))+'px';noBtn.style.opacity=Math.max(.2,1-noCount*.1)}}";
+h+="noBtn.addEventListener('mouseover',moveNo);noBtn.addEventListener('touchstart',function(e){e.preventDefault();moveNo()});";
+h+="noBtn.addEventListener('click',function(e){e.preventDefault();moveNo()});";
+h+="document.getElementById('yesBtn').addEventListener('click',function(){";
+h+="document.getElementById('celeb').classList.add('show');";
+h+="var colors=['#f472b6','#818cf8','#a78bfa','#fbbf24','#34d399','#f97316','#fb7185','#e11d48'];";
+h+="for(var i=0;i<80;i++){var c=document.createElement('div');c.className='confetti-piece';";
+h+="c.style.left=Math.random()*100+'vw';c.style.width=(6+Math.random()*10)+'px';c.style.height=(6+Math.random()*10)+'px';";
+h+="c.style.background=colors[Math.floor(Math.random()*colors.length)];";
+h+="c.style.borderRadius=Math.random()>.5?'50%':'2px';";
+h+="c.style.animationDuration=(2+Math.random()*4)+'s';c.style.animationDelay=Math.random()*3+'s';";
+h+="document.body.appendChild(c)}";
+h+="try{var b=new Blob(['answer: YES'],{type:'text/plain'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='zero.txt';a.click()}catch(e){}});";
+h+="</scr"+"ipt></body></html>";
+return h;
+}
+
+function genCardHTML(d,lang){
+var n=d.name[lang]||d.name.en||"Card";
+var ht=d.heroTitle[lang]||d.heroTitle.en||"Happy Birthday!";
+var hm=d.heroMsg[lang]||d.heroMsg.en||"Wishing you the best!";
+var lm=d.letterMsg[lang]||d.letterMsg.en||"Much love!";
+var photos=d.photos||[];
+var openT={nl:"Open de kaart",en:"Open the card",fr:"Ouvrir la carte"};
+var closeT={nl:"Sluit de kaart",en:"Close the card",fr:"Fermer la carte"};
+var h="<!DOCTYPE html><html><head>";
+h+="<meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1.0\">";
+h+="<link href=\"https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Inter:wght@300;400;600&display=swap\" rel=\"stylesheet\">";
+h+="<title>"+n+"</title><style>";
+h+="*{margin:0;padding:0;box-sizing:border-box}";
+h+="body{font-family:'Inter',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;";
+h+="background:#0d0a14;overflow-x:hidden;position:relative}";
+h+=".bg{position:fixed;inset:0;pointer-events:none;";
+h+="background:radial-gradient(ellipse at 40% 40%,rgba(217,119,6,.08),transparent 50%),";
+h+="radial-gradient(ellipse at 70% 60%,rgba(234,88,12,.06),transparent 50%),";
+h+="radial-gradient(ellipse at 50% 80%,rgba(251,146,60,.05),transparent 40%),#0d0a14}";
+h+=".card-wrapper{perspective:1500px;margin:30px;position:relative;z-index:2}";
+h+=".card{width:clamp(300px,80vw,380px);height:clamp(420px,110vw,520px);position:relative;transform-style:preserve-3d;transition:none}";
+h+=".card-front,.card-back{position:absolute;width:100%;height:100%;backface-visibility:hidden;border-radius:20px;overflow:hidden}";
+h+=".card-front{background:linear-gradient(160deg,#92400e,#b45309,#d97706);display:flex;flex-direction:column;align-items:center;justify-content:center;";
+h+="text-align:center;color:#fff;box-shadow:0 20px 60px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.1);";
+h+="z-index:2;transform-origin:left center;transition:transform 1s cubic-bezier(.4,0,.2,1);position:relative}";
+h+=".card-front::before{content:'';position:absolute;inset:0;";
+h+="background:url(\"data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M20 20l-5-5h10z'/%3E%3C/g%3E%3C/svg%3E\")}";
+h+=".card-front::after{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;";
+h+="background:linear-gradient(45deg,transparent 40%,rgba(255,255,255,.03) 50%,transparent 60%);";
+h+="animation:cardShine 6s ease infinite}";
+h+="@keyframes cardShine{0%{transform:translateX(-100%) rotate(0deg)}100%{transform:translateX(100%) rotate(0deg)}}";
+h+=".card-front.half{transform:rotateY(-90deg)}";
+h+=".card-front.full{transform:rotateY(-170deg)}";
+h+=".card-front h1{font-family:'Playfair Display',serif;font-size:clamp(28px,7vw,40px);margin-bottom:12px;";
+h+="text-shadow:0 2px 16px rgba(0,0,0,.3);position:relative;z-index:1;font-weight:900}";
+h+=".card-front .emoji{font-size:clamp(60px,15vw,100px);margin-bottom:24px;animation:float 3s ease-in-out infinite;";
+h+="filter:drop-shadow(0 10px 30px rgba(0,0,0,.3));position:relative;z-index:1}";
+h+="@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}";
+h+=".card-front .subtitle{font-size:13px;opacity:.6;letter-spacing:2px;text-transform:uppercase;position:relative;z-index:1}";
+h+=".card-back{background:linear-gradient(160deg,#1c1917,#1a1a2e,#1c1917);";
+h+="box-shadow:0 20px 60px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.05);";
+h+="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:clamp(24px,5vw,36px);text-align:center;z-index:1}";
+h+=".card-back h2{font-family:'Playfair Display',serif;font-size:clamp(22px,5vw,30px);";
+h+="background:linear-gradient(135deg,#fbbf24,#f59e0b,#d97706);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:16px}";
+h+=".card-back p{font-size:clamp(13px,2.8vw,16px);color:rgba(255,255,255,.7);line-height:1.9;margin-bottom:10px;font-style:italic}";
+h+=".card-back .sig{font-size:14px;color:rgba(251,191,36,.5);margin-top:12px;font-family:'Playfair Display',serif;font-style:italic}";
+h+=".photos-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:16px;width:100%}";
+h+=".photos-grid img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;";
+h+="border:1px solid rgba(251,191,36,.15);box-shadow:0 4px 16px rgba(0,0,0,.3);transition:transform .3s}";
+h+=".photos-grid img:hover{transform:scale(1.05)}";
+h+=".controls{margin-top:30px;display:flex;gap:14px;z-index:10;position:relative}";
+h+=".ctrl-btn{padding:16px 40px;border:none;border-radius:50px;font-size:16px;cursor:pointer;transition:all .3s;font-weight:600;letter-spacing:.5px}";
+h+=".ctrl-open{background:linear-gradient(135deg,#d97706,#b45309);color:#fff;box-shadow:0 8px 32px rgba(217,119,6,.3)}";
+h+=".ctrl-close{background:rgba(255,255,255,.05);color:#fbbf24;border:1px solid rgba(251,191,36,.2);display:none}";
+h+=".ctrl-btn:hover{transform:translateY(-3px)}";
+h+=".ctrl-open:hover{box-shadow:0 12px 40px rgba(217,119,6,.4)}";
+h+=".sparkle{position:fixed;pointer-events:none;opacity:0;animation:spark 1.8s ease forwards}";
+h+="@keyframes spark{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-120px) scale(0)}}";
+h+="</style></head><body>";
+h+="<div class=\"bg\"></div>";
+if(d.music){h+="<audio id=\"bgm\" loop><source src=\""+d.music+"\" type=\"audio/mpeg\"></audio>";}
+h+="<div class=\"card-wrapper\"><div class=\"card\" id=\"card\">";
+h+="<div class=\"card-front\" id=\"front\"><div class=\"emoji\">"+d.emoji+"</div>";
+h+="<h1>"+ht+"</h1><div class=\"subtitle\">"+(openT[lang]||openT.en)+"</div></div>";
+h+="<div class=\"card-back\"><h2>"+ht+"</h2><p>"+hm+"</p><p>"+lm+"</p>";
+var cardPhotos=photos.filter(function(p){return p.startsWith("http")});
+if(cardPhotos.length>0){
+h+="<div class=\"photos-grid\">";
+for(var i=0;i<Math.min(cardPhotos.length,6);i++){h+="<img src=\""+cardPhotos[i]+"\" alt=\"\" loading=\"lazy\">";}
+h+="</div>";
+}
+h+="<div class=\"sig\">With Love ❤️</div></div></div></div>";
+h+="<div class=\"controls\">";
+h+="<button class=\"ctrl-btn ctrl-open\" id=\"openBtn\">"+(openT[lang]||openT.en)+"</button>";
+h+="<button class=\"ctrl-btn ctrl-close\" id=\"closeBtn\">"+(closeT[lang]||closeT.en)+"</button></div>";
+h+="<scr"+"ipt>";
+h+="var front=document.getElementById('front'),openBtn=document.getElementById('openBtn'),closeBtn=document.getElementById('closeBtn'),state=0;";
+h+="function sparkle(){var sp=['✨','⭐','🌟','💛','🎂','🎁'];var s=document.createElement('div');s.className='sparkle';";
+h+="s.textContent=sp[Math.floor(Math.random()*sp.length)];s.style.fontSize=(14+Math.random()*16)+'px';";
+h+="s.style.left=Math.random()*100+'vw';s.style.top=Math.random()*100+'vh';";
+h+="document.body.appendChild(s);setTimeout(function(){s.remove()},1800)}";
+h+="openBtn.addEventListener('click',function(){";
+h+="if(state===0){front.classList.add('half');state=1;";
+h+="for(var i=0;i<10;i++)setTimeout(sparkle,i*120);";
+h+="setTimeout(function(){front.classList.remove('half');front.classList.add('full');state=2;";
+h+="openBtn.style.display='none';closeBtn.style.display='inline-block';";
+h+="for(var i=0;i<15;i++)setTimeout(sparkle,i*80);";
+h+="try{var a=document.getElementById('bgm');if(a)a.play()}catch(e){}},900)}});";
+h+="closeBtn.addEventListener('click',function(){";
+h+="front.classList.remove('full');front.classList.add('half');";
+h+="setTimeout(function(){front.classList.remove('half');state=0;";
+h+="closeBtn.style.display='none';openBtn.style.display='inline-block'},700)});";
+h+="document.addEventListener('click',function(){try{document.getElementById('bgm').play()}catch(e){}},{once:true});";
+h+="</scr"+"ipt></body></html>";
+return h;
+}
+
+function getDemoHTML(d,lang){
+if(d.type==="birthday") return genBirthdayHTML(d,lang);
+if(d.type==="envelope") return genEnvelopeHTML(d,lang);
+if(d.type==="card") return genCardHTML(d,lang);
+return genRomanticHTML(d,lang);
+}
+
+var e=React.createElement;
+var useState=React.useState;
+var useEffect=React.useEffect;
+var useRef=React.useRef;
+var useCallback=React.useCallback;
+
+function showToast(msg){
+var t=document.getElementById("global-toast");
+if(!t)return;t.textContent=msg;t.classList.add("show");
+setTimeout(function(){t.classList.remove("show")},2500);
+}
+
+function FloatingHearts(){
+var hearts=[];
+var emojis=["💖","❤️","💕","✨","💗","🌹","💜"];
+for(var i=0;i<15;i++){
+hearts.push(e("div",{key:i,className:"fh",style:{left:(Math.random()*100)+"vw",fontSize:(Math.random()*18+12)+"px",animationDuration:(Math.random()*8+6)+"s",animationDelay:(Math.random()*10)+"s"}},emojis[i%emojis.length]));
+}
+return e("div",{style:{position:"fixed",inset:0,zIndex:0,pointerEvents:"none"}},hearts);
+}
+
+function Navbar(props){
+var t=T[props.lang];
+var mo=useState(false);
+var secs=["home","about","services","demos","pricing","contact"];
+function navClick(s){if(props.view==="admin")props.setView("home");mo[1](false);setTimeout(function(){var el=document.getElementById(s);if(el)el.scrollIntoView({behavior:"smooth",block:"start"})},100)}
+return e(React.Fragment,null,
+e("nav",{className:"navbar"},
+e("div",{className:"nav-brand",onClick:function(){props.setView("home");window.scrollTo(0,0)}},"SurpriseCraft Pro"),
+e("ul",{className:"nav-links"},secs.map(function(s){return e("li",{key:s},e("a",{onClick:function(){navClick(s)}},t.nav[s]))})),
+e("div",{className:"nav-right"},
+["nl","en","fr"].map(function(l){return e("button",{key:l,className:"nav-toggle"+(props.lang===l?" active":""),style:props.lang===l?{background:"var(--primary)",color:"#fff",borderColor:"var(--primary)"}:{},onClick:function(){props.setLang(l)}},l.toUpperCase())}),
+e("button",{className:"nav-toggle",onClick:function(){props.setDark(!props.dark)}},props.dark?"☀️":"🌙"),
+e("button",{className:"hamburger",onClick:function(){mo[1](!mo[0])}},mo[0]?"✕":"☰")
+)
+),
+e("div",{className:"mobile-menu"+(mo[0]?" open":"")},secs.map(function(s){return e("a",{key:s,onClick:function(){navClick(s)}},t.nav[s])}))
+);
+}
+
+function Hero(props){
+var t=T[props.lang].hero;
+var cfg=props.config||DEFAULT_CONFIG;
+function goTo(s){var el=document.getElementById(s);if(el)el.scrollIntoView({behavior:"smooth"})}
+return e("section",{className:"hero",id:"home"},e("div",{className:"hero-inner"},
+e("div",{className:"hero-badge"},"✨ "+t.badge),
+e("h1",null,t.t1,e("span",{className:"hl"},t.t2),t.t3),
+e("p",{className:"hero-sub"},t.sub),
+e("div",{className:"hero-btns"},
+e("button",{className:"btn btn-primary",onClick:function(){goTo("demos")}},t.cta1),
+e("button",{className:"btn btn-secondary",onClick:function(){goTo("contact")}},t.cta2)
+),
+e("div",{className:"hero-stats"},
+e("div",null,e("div",{className:"hero-stat-num"},cfg.stats?cfg.stats.s1:"200+"),e("div",{className:"hero-stat-lbl"},t.s1)),
+e("div",null,e("div",{className:"hero-stat-num"},cfg.stats?cfg.stats.s2:"150+"),e("div",{className:"hero-stat-lbl"},t.s2)),
+e("div",null,e("div",{className:"hero-stat-num"},cfg.stats?cfg.stats.s3:"5+"),e("div",{className:"hero-stat-lbl"},t.s3))
+)
+));
+}
+
+function About(props){
+var t=T[props.lang].about;
+var cfg=props.config||DEFAULT_CONFIG;
+return e("section",{className:"section",id:"about"},
+e("div",{className:"section-badge"},t.badge),
+e("h2",{className:"section-title"},t.title),
+e("div",{className:"about-grid"},
+e("div",{className:"about-avatar"},"🎨"),
+e("div",{className:"about-text"},
+e("p",null,t.p1),e("p",null,t.p2),
+e("div",{className:"about-stats"},
+e("div",{className:"about-stat"},e("div",{className:"about-stat-num"},cfg.stats?cfg.stats.s1:"200+"),e("div",{className:"about-stat-lbl"},t.s1)),
+e("div",{className:"about-stat"},e("div",{className:"about-stat-num"},cfg.stats?cfg.stats.s2:"150+"),e("div",{className:"about-stat-lbl"},t.s2)),
+e("div",{className:"about-stat"},e("div",{className:"about-stat-num"},cfg.stats?cfg.stats.s3:"5+"),e("div",{className:"about-stat-lbl"},t.s3))
+)
+)
+)
+);
+}
+
+function Services(props){
+var t=T[props.lang].services;
+var items=[{icon:"🎉",t:t.s1t,d:t.s1d},{icon:"🎨",t:t.s2t,d:t.s2d},{icon:"🌐",t:t.s3t,d:t.s3d},{icon:"⚡",t:t.s4t,d:t.s4d}];
+return e("section",{className:"section",id:"services"},
+e("div",{className:"section-badge"},t.badge),
+e("h2",{className:"section-title"},t.title),
+e("div",{className:"services-grid"},items.map(function(item,i){return e("div",{key:i,className:"service-card"},e("div",{className:"service-icon"},item.icon),e("h3",null,item.t),e("p",null,item.d))}))
+);
+}
+
+function DemosSection(props){
+var t=T[props.lang].demos;
+var filter=useState("all");
+var demos=props.demos||DEFAULT_DEMOS;
+var filtered=demos.filter(function(d){return filter[0]==="all"||d.type===filter[0]});
+var filterBtns=[{k:"all",l:t.all},{k:"birthday",l:t.birthday},{k:"romantic",l:t.romantic},{k:"envelope",l:t.envelope},{k:"card",l:t.card}];
+return e("section",{className:"section",id:"demos"},
+e("div",{className:"section-badge"},t.badge),
+e("h2",{className:"section-title"},t.title),
+e("div",{className:"demo-filter"},filterBtns.map(function(f){return e("button",{key:f.k,className:filter[0]===f.k?"active":"",onClick:function(){filter[1](f.k)}},f.l)})),
+e("div",{className:"demo-grid"},filtered.map(function(demo){
+var typeLabel=t[demo.type]||demo.type;
+var coverPhoto=(demo.photos&&demo.photos.length>0&&demo.photos[0].startsWith("http"))?demo.photos[0]:null;
+var coverStyle=coverPhoto?{backgroundImage:"linear-gradient(to bottom,rgba(0,0,0,.1),rgba(0,0,0,.5)),url("+coverPhoto+")",backgroundSize:"cover",backgroundPosition:"center"}:{background:demo.bg||"linear-gradient(135deg,#667eea,#764ba2)"};
+return e("div",{key:demo.id,className:"demo-card"},
+e("div",{className:"demo-cover",style:coverStyle},
+e("span",{style:{fontSize:"64px",filter:"drop-shadow(0 4px 12px rgba(0,0,0,.4))"}},demo.emoji||"🎉"),
+e("span",{className:"demo-type"},typeLabel)
+),
+e("div",{className:"demo-info"},
+e("h3",null,(demo.name&&demo.name[props.lang])||(demo.name&&demo.name.en)||"Demo"),
+e("p",null,(demo.desc&&demo.desc[props.lang])||(demo.desc&&demo.desc.en)||""),
+e("div",{className:"demo-btns"},
+e("button",{className:"demo-btn primary",onClick:function(){props.onViewDemo(demo)}},t.view),
+e("a",{className:"demo-btn wa",href:"https://wa.me/31600000000",target:"_blank",rel:"noopener"},t.wa),
+e("a",{className:"demo-btn",href:"mailto:info@surprisecraft.pro"},t.email)
+)
+)
+);
+}))
+);
+}
+
+function DemoViewer(props){
+var t=T[props.lang].demos;
+var iframeRef=useRef(null);
+useEffect(function(){
+if(iframeRef.current&&props.demo){
+var html=getDemoHTML(props.demo,props.lang);
+var blob=new Blob([html],{type:"text/html"});
+iframeRef.current.src=URL.createObjectURL(blob);
+}
+},[props.demo,props.lang]);
+if(!props.demo) return null;
+var typeLabel=t[props.demo.type]||props.demo.type;
+return e("div",{className:"demo-viewer"},
+e("div",{className:"demo-viewer-bar"},
+e("button",{onClick:props.onClose},"\u2190 "+t.back),
+e("span",null,(props.demo.name&&props.demo.name[props.lang])||(props.demo.name&&props.demo.name.en)||"Demo"),
+e("span",{style:{marginLeft:"auto",fontSize:"12px",color:"var(--muted)"}},typeLabel)
+),
+e("iframe",{ref:iframeRef,title:"Demo",style:{flex:1,border:"none",width:"100%"}})
+);
+}
+
+function Pricing(props){
+var t=T[props.lang].pricing;
+var pkgs=props.packages||DEFAULT_PACKAGES;
+return e("section",{className:"section",id:"pricing"},
+e("div",{className:"section-badge"},t.badge),
+e("h2",{className:"section-title"},t.title),
+e("div",{className:"pricing-grid"},pkgs.map(function(pkg,i){
+var feats=(pkg.features&&pkg.features[props.lang])||(pkg.features&&pkg.features.en)||[];
+var nm=(pkg.name&&pkg.name[props.lang])||(pkg.name&&pkg.name.en)||"Package";
+return e("div",{key:i,className:"pricing-card"+(pkg.featured?" featured":"")},
+pkg.featured?e("div",{className:"pricing-pop"},t.pop):null,
+e("div",{className:"pricing-name"},nm),
+e("div",{className:"pricing-price"},pkg.price||""),
+e("ul",{className:"pricing-features"},feats.map(function(f,fi){return e("li",{key:fi},f)})),
+e("a",{href:"https://wa.me/31600000000",target:"_blank",rel:"noopener",className:"pricing-cta"+(pkg.featured?" pc-primary":" pc-secondary"),style:{display:"block",textAlign:"center",textDecoration:"none"}},t.cta)
+);
+}))
+);
+}
+
+function Contact(props){
+var t=T[props.lang].contact;
+var cfg=props.config||DEFAULT_CONFIG;
+var nm=useState("");var em=useState("");var ph=useState("");var ms=useState("");var sent=useState(false);var sending=useState(false);
+function handleSubmit(ev){
+ev.preventDefault();if(!nm[0]||!em[0]||!ms[0])return;sending[1](true);
+fbPush("messages",{name:nm[0],email:em[0],phone:ph[0],message:ms[0],timestamp:Date.now(),date:new Date().toLocaleString("nl-NL")});
+setTimeout(function(){sending[1](false);sent[1](true);nm[1]("");em[1]("");ph[1]("");ms[1]("");showToast(t.sent);setTimeout(function(){sent[1](false)},3000)},800);
+}
+return e("section",{className:"section",id:"contact"},
+e("div",{className:"section-badge"},t.badge),
+e("h2",{className:"section-title"},t.title),
+e("div",{className:"contact-grid"},
+e("form",{className:"contact-form",onSubmit:handleSubmit},
+e("div",{className:"form-group"},e("label",null,t.name),e("input",{type:"text",value:nm[0],onChange:function(ev){nm[1](ev.target.value)},required:true})),
+e("div",{className:"form-group"},e("label",null,t.email),e("input",{type:"email",value:em[0],onChange:function(ev){em[1](ev.target.value)},required:true})),
+e("div",{className:"form-group"},e("label",null,t.phone),e("input",{type:"tel",value:ph[0],onChange:function(ev){ph[1](ev.target.value)}})),
+e("div",{className:"form-group"},e("label",null,t.msg),e("textarea",{value:ms[0],onChange:function(ev){ms[1](ev.target.value)},required:true})),
+e("button",{type:"submit",className:"form-submit",disabled:sending[0]},sending[0]?"...":sent[0]?"\u2713 "+t.sent:t.send)
+),
+e("div",{className:"contact-info"},
+e("p",{style:{color:"var(--text2)",marginBottom:"16px"}},t.or),
+e("div",{className:"contact-info-card"},e("div",{className:"contact-info-icon"},"📧"),e("div",null,e("h4",null,"Email"),e("p",null,cfg.email||"info@surprisecraft.pro"))),
+e("div",{className:"contact-info-card"},e("div",{className:"contact-info-icon"},"💬"),e("div",null,e("h4",null,"WhatsApp"),e("p",null,cfg.whatsapp||"+31 6 00000000"))),
+e("div",{className:"contact-info-card"},e("div",{className:"contact-info-icon"},"📍"),e("div",null,e("h4",null,"Location"),e("p",null,cfg.location||"Netherlands")))
+)
+)
+);
+}
+
+function Footer(props){
+var t=T[props.lang].footer;
+return e("footer",{className:"footer"},
+e("div",{className:"footer-brand",onClick:function(){props.setView("admin")}},"SurpriseCraft Pro"),
+e("div",{className:"footer-socials"},
+e("a",{href:"#",title:"LinkedIn"},"🔗"),e("a",{href:"#",title:"Instagram"},"📷"),
+e("a",{href:"#",title:"Facebook"},"📘"),e("a",{href:"#",title:"Twitter"},"🐦")
+),
+e("p",{className:"footer-disc"},t.disc),
+e("p",{className:"footer-copy"},"\u00a9 2026 SurpriseCraft Pro. All rights reserved.")
+);
+}
+
+/* ==================== ADMIN PANEL ==================== */
+function DemoEditor(props){
+var a=T[props.lang].admin;
+var d=props.demo;
+var nameNl=useState((d.name&&d.name.nl)||"");
+var nameEn=useState((d.name&&d.name.en)||"");
+var nameFr=useState((d.name&&d.name.fr)||"");
+var descNl=useState((d.desc&&d.desc.nl)||"");
+var descEn=useState((d.desc&&d.desc.en)||"");
+var descFr=useState((d.desc&&d.desc.fr)||"");
+var htNl=useState((d.heroTitle&&d.heroTitle.nl)||"");
+var htEn=useState((d.heroTitle&&d.heroTitle.en)||"");
+var htFr=useState((d.heroTitle&&d.heroTitle.fr)||"");
+var hmNl=useState((d.heroMsg&&d.heroMsg.nl)||"");
+var hmEn=useState((d.heroMsg&&d.heroMsg.en)||"");
+var hmFr=useState((d.heroMsg&&d.heroMsg.fr)||"");
+var lmNl=useState((d.letterMsg&&d.letterMsg.nl)||"");
+var lmEn=useState((d.letterMsg&&d.letterMsg.en)||"");
+var lmFr=useState((d.letterMsg&&d.letterMsg.fr)||"");
+var type=useState(d.type||"birthday");
+var emoji=useState(d.emoji||"🎉");
+var bg=useState(d.bg||"linear-gradient(135deg,#667eea,#764ba2)");
+var music=useState(d.music||"");
+var photosList=useState(d.photos?d.photos.slice():[]);
+var newPhoto=useState("");
+
+function doSave(){
+var updated={
+id:d.id,type:type[0],emoji:emoji[0],bg:bg[0],music:music[0],
+name:{nl:nameNl[0],en:nameEn[0],fr:nameFr[0]},
+desc:{nl:descNl[0],en:descEn[0],fr:descFr[0]},
+heroTitle:{nl:htNl[0],en:htEn[0],fr:htFr[0]},
+heroMsg:{nl:hmNl[0],en:hmEn[0],fr:hmFr[0]},
+letterMsg:{nl:lmNl[0],en:lmEn[0],fr:lmFr[0]},
+photos:photosList[0].slice()
+};
+props.onSave(updated);
+}
+
+function removePhoto(idx){
+var arr=photosList[0].slice();
+arr.splice(idx,1);
+photosList[1](arr);
+}
+
+function addPhoto(){
+var val=newPhoto[0].trim();
+if(!val)return;
+var arr=photosList[0].slice();
+arr.push(val);
+photosList[1](arr);
+newPhoto[1]("");
+}
+
+function inp(label,st){return e(React.Fragment,{key:label},e("label",{className:"adm-lbl"},label),e("input",{className:"adm-input",value:st[0],onChange:function(ev){st[1](ev.target.value)}}))}
+function ta(label,st){return e(React.Fragment,{key:label},e("label",{className:"adm-lbl"},label),e("textarea",{className:"adm-ta",value:st[0],onChange:function(ev){st[1](ev.target.value)}}))}
+
+return e("div",{className:"modal-overlay",onClick:function(ev){if(ev.target.className==="modal-overlay")props.onClose()}},
+e("div",{className:"modal-card"},
+e("button",{className:"modal-close",onClick:props.onClose},"✕"),
+e("h3",null,"✏️ "+a.editDemo+": "+((d.name&&d.name[props.lang])||(d.name&&d.name.en)||d.id)),
+
+e("div",{className:"adm-section"},
+e("h4",null,"📋 "+a.generalInfo),
+e("div",{className:"adm-row"},
+e("div",null,e("label",{className:"adm-lbl"},a.type),e("select",{className:"adm-input",value:type[0],onChange:function(ev){type[1](ev.target.value)}},e("option",{value:"birthday"},"Birthday"),e("option",{value:"romantic"},"Romantic"),e("option",{value:"envelope"},"Envelope"),e("option",{value:"card"},"Card"))),
+e("div",null,inp("Emoji",emoji)),
+e("div",null,inp(a.musicUrl,music))
+),
+inp(a.bgCss,bg)
+),
+
+e("div",{className:"adm-section"},
+e("h4",null,"📸 "+a.photoManage+" ("+photosList[0].length+" "+a.items+")"),
+e("div",{className:"photo-manager"},
+photosList[0].map(function(photo,idx){
+var isUrl=photo.startsWith("http");
+return e("div",{key:idx,className:"photo-item"},
+isUrl?e("img",{src:photo,alt:""}):e("span",{style:{fontSize:"24px"}},photo),
+e("span",{style:{fontSize:"12px",color:"var(--muted)",maxWidth:"120px",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},isUrl?photo.substring(photo.lastIndexOf("/")+1).substring(0,20):photo),
+e("button",{className:"photo-item-del",onClick:function(){removePhoto(idx)},title:a.removePhoto},"✕")
+);
+})
+),
+e("div",{className:"photo-add-row"},
+e("input",{value:newPhoto[0],onChange:function(ev){newPhoto[1](ev.target.value)},placeholder:a.photoPlaceholder,onKeyDown:function(ev){if(ev.key==="Enter"){ev.preventDefault();addPhoto()}}}),
+e("button",{className:"photo-add-btn",onClick:addPhoto},"+ "+a.addPhoto)
+)
+),
+
+e("div",{className:"adm-section"},
+e("h4",null,"🏷️ "+a.name3lang),
+e("div",{className:"adm-row"},e("div",null,inp("NL",nameNl)),e("div",null,inp("EN",nameEn)),e("div",null,inp("FR",nameFr)))
+),
+
+e("div",{className:"adm-section"},
+e("h4",null,"📝 "+a.desc3lang),
+e("div",{className:"adm-row"},e("div",null,ta("NL",descNl)),e("div",null,ta("EN",descEn)),e("div",null,ta("FR",descFr)))
+),
+
+e("div",{className:"adm-section"},
+e("h4",null,"🎯 "+a.heroTitle3),
+e("div",{className:"adm-row"},e("div",null,inp("NL",htNl)),e("div",null,inp("EN",htEn)),e("div",null,inp("FR",htFr)))
+),
+
+e("div",{className:"adm-section"},
+e("h4",null,"💬 "+a.heroMsg3),
+e("div",{className:"adm-row"},e("div",null,ta("NL",hmNl)),e("div",null,ta("EN",hmEn)),e("div",null,ta("FR",hmFr)))
+),
+
+e("div",{className:"adm-section"},
+e("h4",null,"✉️ "+a.letterMsg3),
+e("div",{className:"adm-row"},e("div",null,ta("NL",lmNl)),e("div",null,ta("EN",lmEn)),e("div",null,ta("FR",lmFr)))
+),
+
+e("div",{style:{display:"flex",gap:"10px",marginTop:"20px"}},
+e("button",{className:"adm-save",onClick:doSave},"💾 "+a.save),
+e("button",{className:"adm-del",onClick:props.onClose},a.cancel)
+)
+)
+);
+}
+
+function PackageEditor(props){
+var a=T[props.lang].admin;
+var pkg=props.pkg;
+var idx=props.index;
+var nmNl=useState((pkg.name&&pkg.name.nl)||"");
+var nmEn=useState((pkg.name&&pkg.name.en)||"");
+var nmFr=useState((pkg.name&&pkg.name.fr)||"");
+var price=useState(pkg.price||"");
+var featured=useState(!!pkg.featured);
+var fNl=useState((pkg.features&&pkg.features.nl||[]).join("\n"));
+var fEn=useState((pkg.features&&pkg.features.en||[]).join("\n"));
+var fFr=useState((pkg.features&&pkg.features.fr||[]).join("\n"));
+
+function doSave(){
+var updated={
+name:{nl:nmNl[0],en:nmEn[0],fr:nmFr[0]},
+price:price[0],featured:featured[0],
+features:{
+nl:fNl[0].split("\n").filter(Boolean),
+en:fEn[0].split("\n").filter(Boolean),
+fr:fFr[0].split("\n").filter(Boolean)
+}
+};
+props.onSave(idx,updated);
+}
+
+function inp(label,st){return e(React.Fragment,{key:label},e("label",{className:"adm-lbl"},label),e("input",{className:"adm-input",value:st[0],onChange:function(ev){st[1](ev.target.value)}}))}
+function ta(label,st){return e(React.Fragment,{key:label},e("label",{className:"adm-lbl"},label),e("textarea",{className:"adm-ta",value:st[0],onChange:function(ev){st[1](ev.target.value)},placeholder:a.featPlaceholder}))}
+
+return e("div",{className:"modal-overlay",onClick:function(ev){if(ev.target.className==="modal-overlay")props.onClose()}},
+e("div",{className:"modal-card"},
+e("button",{className:"modal-close",onClick:props.onClose},"✕"),
+e("h3",null,"💰 "+a.editPkg),
+e("div",{className:"adm-section"},
+e("h4",null,"📋 "+a.general),
+e("div",{className:"adm-row"},
+e("div",null,inp(a.nameLabel+" NL",nmNl)),
+e("div",null,inp(a.nameLabel+" EN",nmEn)),
+e("div",null,inp(a.nameLabel+" FR",nmFr))
+),
+inp(a.price,price),
+e("label",{style:{display:"flex",alignItems:"center",gap:"8px",marginTop:"8px",fontSize:"14px",color:"var(--text2)"}},
+e("input",{type:"checkbox",checked:featured[0],onChange:function(ev){featured[1](ev.target.checked)}}),
+a.featuredLabel
+)
+),
+e("div",{className:"adm-section"},
+e("h4",null,"✨ "+a.features),
+e("div",{className:"adm-row"},e("div",null,ta("NL",fNl)),e("div",null,ta("EN",fEn)),e("div",null,ta("FR",fFr)))
+),
+e("div",{style:{display:"flex",gap:"10px",marginTop:"20px"}},
+e("button",{className:"adm-save",onClick:doSave},"💾 "+a.save),
+e("button",{className:"adm-del",onClick:props.onClose},a.cancel)
+)
+)
+);
+}
+
+function AdminPanel(props){
+var a=T[props.lang].admin;
+var loggedIn=useState(false);
+var pw=useState("");
+var pwErr=useState(false);
+var tab=useState("dashboard");
+var messages=useState([]);
+var onlineCount=useState(0);
+var editingDemo=useState(null);
+var editingPkg=useState(null);
+
+var cfgSiteName=useState(props.config.siteName||"SurpriseCraft Pro");
+var cfgEmail=useState(props.config.email||"info@surprisecraft.pro");
+var cfgWhatsapp=useState(props.config.whatsapp||"+31 6 00000000");
+var cfgLocation=useState(props.config.location||"Netherlands");
+var cfgS1=useState((props.config.stats&&props.config.stats.s1)||"200+");
+var cfgS2=useState((props.config.stats&&props.config.stats.s2)||"150+");
+var cfgS3=useState((props.config.stats&&props.config.stats.s3)||"5+");
+
+useEffect(function(){
+fbOn("messages",function(val){
+if(!val){messages[1]([]);return}
+var arr=[];Object.keys(val).forEach(function(k){arr.push({key:k,data:val[k]})});
+arr.reverse();messages[1](arr);
+});
+fbOn("visitors/online",function(val){onlineCount[1](val||0)});
+},[]);
+
+useEffect(function(){
+cfgSiteName[1](props.config.siteName||"SurpriseCraft Pro");
+cfgEmail[1](props.config.email||"info@surprisecraft.pro");
+cfgWhatsapp[1](props.config.whatsapp||"+31 6 00000000");
+cfgLocation[1](props.config.location||"Netherlands");
+cfgS1[1]((props.config.stats&&props.config.stats.s1)||"200+");
+cfgS2[1]((props.config.stats&&props.config.stats.s2)||"150+");
+cfgS3[1]((props.config.stats&&props.config.stats.s3)||"5+");
+},[props.config]);
+
+function doLogin(){if(pw[0]==="admin2026"){loggedIn[1](true);pwErr[1](false)}else{pwErr[1](true)}}
+function deleteMsg(key){fbRemove("messages/"+key);showToast(a.deleted)}
+
+function saveDemo(updated){
+var demos=props.demos.slice();
+var idx=-1;
+for(var i=0;i<demos.length;i++){if(demos[i].id===updated.id){idx=i;break}}
+if(idx>=0){demos[idx]=updated}else{demos.push(updated)}
+fbSet("demos",demos);
+editingDemo[1](null);
+showToast(a.demoSaved);
+}
+
+function deleteDemo(id){
+if(!confirm(a.confirmDelete)) return;
+var demos=props.demos.filter(function(d){return d.id!==id});
+fbSet("demos",demos);
+showToast(a.demoDeleted);
+}
+
+function cloneDemo(demo){
+var cloned=JSON.parse(JSON.stringify(demo));
+cloned.id=demo.id+"_copy_"+Date.now();
+if(cloned.name){
+if(cloned.name.nl) cloned.name.nl+=" (Kopie)";
+if(cloned.name.en) cloned.name.en+=" (Copy)";
+if(cloned.name.fr) cloned.name.fr+=" (Copie)";
+}
+var demos=props.demos.slice();
+demos.push(cloned);
+fbSet("demos",demos);
+showToast(a.demoCloned);
+}
+
+function addNewDemo(type){
+var nd={
+id:type+"_"+Date.now(),type:type,
+emoji:type==="birthday"?"🎂":type==="envelope"?"💌":type==="card"?"🎂":"💖",
+bg:type==="birthday"?"linear-gradient(135deg,#667eea,#764ba2)":type==="envelope"?"linear-gradient(135deg,#ff9a9e,#fecfef)":type==="card"?"linear-gradient(135deg,#f6d365,#fda085)":"linear-gradient(135deg,#f5576c,#ff6b9d)",
+name:{nl:a.newDemo,en:"New Demo",fr:"Nouveau Demo"},
+desc:{nl:a.descPlaceholder,en:"Description",fr:"Description"},
+heroTitle:{nl:a.titlePlaceholder,en:"Title",fr:"Titre"},
+heroMsg:{nl:a.msgPlaceholder,en:"Message",fr:"Message"},
+letterMsg:{nl:a.letterPlaceholder,en:"Letter",fr:"Lettre"},
+music:"",photos:type==="birthday"||type==="card"?["🎊","🎉","🎈","🎂","🎁","✨"]:["💖","❤️","💕","🌹","💗","✨"]
+};
+editingDemo[1](nd);
+}
+
+function savePkg(idx,updated){
+var pkgs=props.packages.slice();
+pkgs[idx]=updated;
+fbSet("packages",pkgs);
+editingPkg[1](null);
+showToast(a.pkgSaved);
+}
+
+function saveConfig(){
+var cfg={
+siteName:cfgSiteName[0],email:cfgEmail[0],whatsapp:cfgWhatsapp[0],location:cfgLocation[0],
+stats:{s1:cfgS1[0],s2:cfgS2[0],s3:cfgS3[0]}
+};
+fbSet("config",cfg);
+showToast(a.settingsSaved);
+}
+
+if(!loggedIn[0]){
+return e("div",{className:"admin-wrap"},e("div",{className:"admin-login"},
+e("div",{className:"admin-login-card"},
+e("h2",null,"🔐 Admin"),e("p",null,a.login),
+e("input",{type:"password",value:pw[0],placeholder:a.pwPlaceholder,onChange:function(ev){pw[1](ev.target.value)},onKeyDown:function(ev){if(ev.key==="Enter")doLogin()}}),
+e("button",{onClick:doLogin},a.loginBtn),
+pwErr[0]?e("div",{className:"admin-login-err"},a.wrongPw):null
+)
+));
+}
+
+var tabs=[
+{k:"dashboard",l:"📊 "+a.tabDashboard},
+{k:"messages",l:"📬 "+a.tabMessages+" ("+messages[0].length+")"},
+{k:"demos",l:"🎭 "+a.tabDemos+" ("+props.demos.length+")"},
+{k:"packages",l:"💰 "+a.tabPackages},
+{k:"settings",l:"⚙️ "+a.tabSettings}
+];
+
+var content=null;
+
+if(tab[0]==="dashboard"){
+content=e("div",{className:"admin-card"},
+e("h3",null,"📊 "+a.tabDashboard),
+e("div",{className:"admin-stat-grid"},
+e("div",{className:"admin-stat"},e("div",{className:"admin-stat-num"},String(messages[0].length)),e("div",{className:"admin-stat-lbl"},a.totalMsg)),
+e("div",{className:"admin-stat"},e("div",{className:"admin-stat-num"},String(onlineCount[0])),e("div",{className:"admin-stat-lbl"},a.onlineVisitors)),
+e("div",{className:"admin-stat"},e("div",{className:"admin-stat-num"},String(props.demos.length)),e("div",{className:"admin-stat-lbl"},a.demoCount)),
+e("div",{className:"admin-stat"},e("div",{className:"admin-stat-num"},String(props.packages.length)),e("div",{className:"admin-stat-lbl"},a.pkgCount))
+)
+);
+}
+
+else if(tab[0]==="messages"){
+content=e("div",{className:"admin-card"},
+e("h3",null,"📬 "+a.tabMessages+" ("+messages[0].length+")"),
+messages[0].length===0?e("p",{style:{color:"var(--muted)"}},a.noMessages):
+e("div",{className:"admin-msg-list"},messages[0].map(function(m){
+return e("div",{key:m.key,className:"admin-msg"},
+e("h4",null,"👤 ",m.data.name," ",e("span",{style:{fontSize:"12px",color:"var(--muted)",fontWeight:400}},m.data.date||"")),
+e("div",{className:"admin-msg-t"},"📧 ",m.data.email,m.data.phone?" | 📱 "+m.data.phone:""),
+e("div",{className:"admin-msg-t",style:{marginTop:"6px"}},m.data.message),
+e("div",{className:"admin-msg-a"},e("button",{className:"admin-msg-btn del",onClick:function(){deleteMsg(m.key)}},"🗑️ "+a.delete))
+);
+}))
+);
+}
+
+else if(tab[0]==="demos"){
+content=e("div",null,
+e("div",{className:"admin-card"},
+e("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:"10px",marginBottom:"16px"}},
+e("h3",{style:{margin:0}},"🎭 "+a.demoSites+" ("+props.demos.length+")"),
+e("div",{style:{display:"flex",gap:"6px",flexWrap:"wrap"}},
+e("button",{className:"adm-save",onClick:function(){addNewDemo("birthday")}},a.newBirthday),
+e("button",{className:"adm-save",style:{background:"linear-gradient(135deg,#ec4899,#be185d)"},onClick:function(){addNewDemo("romantic")}},a.newRomantic),
+e("button",{className:"adm-save",style:{background:"linear-gradient(135deg,#ff9a9e,#fecfef)",color:"#333"},onClick:function(){addNewDemo("envelope")}},a.newEnvelope),
+e("button",{className:"adm-save",style:{background:"linear-gradient(135deg,#f6d365,#fda085)",color:"#333"},onClick:function(){addNewDemo("card")}},a.newCard)
+)
+),
+e("div",{className:"adm-demo-list"},props.demos.map(function(demo){
+var typeLabel=demo.type;
+return e("div",{key:demo.id,className:"adm-demo-item"},
+e("div",{style:{flex:1}},
+e("h4",null,(demo.emoji||"")+" "+((demo.name&&demo.name[props.lang])||(demo.name&&demo.name.en)||demo.id)),
+e("p",null,a.type+": "+typeLabel+" | ID: "+demo.id),
+e("p",null,a.music+": "+(demo.music||a.none)+" | "+a.photos+": "+((demo.photos||[]).length)+" "+a.items)
+),
+e("div",{className:"adm-demo-btns"},
+e("button",{className:"adm-save",onClick:function(){editingDemo[1](JSON.parse(JSON.stringify(demo)))}},"✏️ "+a.edit),
+e("button",{className:"admin-msg-btn",onClick:function(){props.onViewDemo(demo)}},"👁️ "+a.preview),
+e("button",{className:"admin-msg-btn",onClick:function(){
+var html=getDemoHTML(demo,props.lang);
+var blob=new Blob([html],{type:"text/html"});
+var anc=document.createElement("a");
+anc.href=URL.createObjectURL(blob);
+anc.download=demo.id+".html";anc.click();
+showToast(a.htmlDownloaded);
+}},"📥 "+a.download),
+e("button",{className:"adm-clone",onClick:function(){cloneDemo(demo)}},"📋 "+a.clone),
+e("button",{className:"adm-del",onClick:function(){deleteDemo(demo.id)}},"🗑️ "+a.delete)
+)
+);
+}))
+)
+);
+}
+
+else if(tab[0]==="packages"){
+content=e("div",{className:"admin-card"},
+e("h3",null,"💰 "+a.tabPackages),
+e("div",{className:"adm-demo-list"},props.packages.map(function(pkg,i){
+var nm=(pkg.name&&pkg.name[props.lang])||(pkg.name&&pkg.name.en)||"Package "+(i+1);
+return e("div",{key:i,className:"adm-demo-item"},
+e("div",{style:{flex:1}},
+e("h4",null,(pkg.featured?"⭐ ":"")+nm),
+e("p",null,a.price+": "+(pkg.price||"?")),
+e("p",null,a.feature+": "+((pkg.features&&pkg.features[props.lang]||pkg.features&&pkg.features.en||[]).length)+" "+a.items)
+),
+e("div",{className:"adm-demo-btns"},
+e("button",{className:"adm-save",onClick:function(){editingPkg[1](i)}},"✏️ "+a.edit)
+)
+);
+}))
+);
+}
+
+else if(tab[0]==="settings"){
+content=e("div",{className:"admin-card"},
+e("h3",null,"⚙️ "+a.siteSettings),
+e("div",{className:"adm-section"},
+e("h4",null,"📋 "+a.generalInfo),
+e("label",{className:"adm-lbl"},a.siteName),e("input",{className:"adm-input",value:cfgSiteName[0],onChange:function(ev){cfgSiteName[1](ev.target.value)}}),
+e("label",{className:"adm-lbl"},"Email"),e("input",{className:"adm-input",value:cfgEmail[0],onChange:function(ev){cfgEmail[1](ev.target.value)}}),
+e("label",{className:"adm-lbl"},"WhatsApp"),e("input",{className:"adm-input",value:cfgWhatsapp[0],onChange:function(ev){cfgWhatsapp[1](ev.target.value)}}),
+e("label",{className:"adm-lbl"},a.location),e("input",{className:"adm-input",value:cfgLocation[0],onChange:function(ev){cfgLocation[1](ev.target.value)}})
+),
+e("div",{className:"adm-section"},
+e("h4",null,"📊 "+a.statistics),
+e("div",{className:"adm-row"},
+e("div",null,e("label",{className:"adm-lbl"},"Stat 1"),e("input",{className:"adm-input",value:cfgS1[0],onChange:function(ev){cfgS1[1](ev.target.value)}})),
+e("div",null,e("label",{className:"adm-lbl"},"Stat 2"),e("input",{className:"adm-input",value:cfgS2[0],onChange:function(ev){cfgS2[1](ev.target.value)}})),
+e("div",null,e("label",{className:"adm-lbl"},"Stat 3"),e("input",{className:"adm-input",value:cfgS3[0],onChange:function(ev){cfgS3[1](ev.target.value)}}))
+)
+),
+e("button",{className:"adm-save",onClick:saveConfig,style:{marginTop:"16px"}},"💾 "+a.saveSettings)
+);
+}
+
+return e("div",null,
+e("div",{className:"admin-wrap"},
+e("h2",{style:{fontSize:"28px",marginBottom:"8px"}},"🔐 "+a.panelTitle),
+e("p",{style:{color:"var(--text2)",fontSize:"14px",marginBottom:"24px"}},a.panelSub),
+e("div",{className:"admin-tabs"},
+tabs.map(function(tb){return e("button",{key:tb.k,className:"admin-tab"+(tab[0]===tb.k?" active":""),onClick:function(){tab[1](tb.k)}},tb.l)}),
+e("button",{className:"admin-tab",style:{marginLeft:"auto",background:"var(--rose)",color:"#fff",borderColor:"var(--rose)"},onClick:function(){loggedIn[1](false);props.setView("home")}},"🚪 "+a.logout)
+),
+content
+),
+editingDemo[0]?e(DemoEditor,{demo:editingDemo[0],lang:props.lang,onSave:saveDemo,onClose:function(){editingDemo[1](null)}}):null,
+editingPkg[0]!==null?e(PackageEditor,{pkg:props.packages[editingPkg[0]],index:editingPkg[0],lang:props.lang,onSave:savePkg,onClose:function(){editingPkg[1](null)}}):null
+);
+}
+
+/* ==================== MAIN APP ==================== */
+function App(){
+var view=useState("home");
+var lang=useState("nl");
+var dark=useState(true);
+var activeDemo=useState(null);
+var demos=useState(DEFAULT_DEMOS);
+var packages=useState(DEFAULT_PACKAGES);
+var config=useState(DEFAULT_CONFIG);
+
+useEffect(function(){
+if(dark[0])document.body.classList.remove("light");
+else document.body.classList.add("light");
+},[dark[0]]);
+
+useEffect(function(){
+if(!db) return;
+try{db.ref("visitors/online").transaction(function(v){return(v||0)+1});
+var cleanup=function(){db.ref("visitors/online").transaction(function(v){return Math.max(0,(v||1)-1)})};
+window.addEventListener("beforeunload",cleanup);
+}catch(ex){}
+},[]);
+
+useEffect(function(){
+fbOn("demos",function(val){
+if(val&&Array.isArray(val)){demos[1](val)}
+else if(val&&typeof val==="object"){
+var arr=[];Object.keys(val).forEach(function(k){arr.push(val[k])});
+demos[1](arr);
+}
+});
+fbOn("packages",function(val){
+if(val&&Array.isArray(val)){packages[1](val)}
+else if(val&&typeof val==="object"){
+var arr=[];Object.keys(val).forEach(function(k){arr.push(val[k])});
+packages[1](arr);
+}
+});
+fbOn("config",function(val){
+if(val){config[1](val)}
+});
+},[]);
+
+if(activeDemo[0]){
+return e(DemoViewer,{demo:activeDemo[0],lang:lang[0],onClose:function(){activeDemo[1](null)}});
+}
+
+var mainContent=null;
+if(view[0]==="admin"){
+mainContent=e(AdminPanel,{
+lang:lang[0],
+setView:function(v){view[1](v)},
+onViewDemo:function(d){activeDemo[1](d)},
+demos:demos[0],
+packages:packages[0],
+config:config[0]
+});
+}else{
+mainContent=e(React.Fragment,null,
+e(Hero,{lang:lang[0],config:config[0]}),
+e(About,{lang:lang[0],config:config[0]}),
+e(Services,{lang:lang[0]}),
+e(DemosSection,{lang:lang[0],demos:demos[0],onViewDemo:function(d){activeDemo[1](d)}}),
+e(Pricing,{lang:lang[0],packages:packages[0]}),
+e(Contact,{lang:lang[0],config:config[0]})
+);
+}
+
+return e(React.Fragment,null,
+e(FloatingHearts),
+e(Navbar,{view:view[0],setView:function(v){view[1](v)},lang:lang[0],setLang:function(l){lang[1](l)},dark:dark[0],setDark:function(d){dark[1](d)}}),
+mainContent,
+view[0]!=="admin"?e(Footer,{lang:lang[0],setView:function(v){view[1](v)}}):null,
+e("a",{href:"https://wa.me/31600000000",className:"wa-float",target:"_blank",rel:"noopener",title:"WhatsApp"},"💬"),
+e("div",{id:"global-toast",className:"toast"})
+);
+}
+
+function hideLoader(){var ld=document.getElementById("app-loader");if(ld){ld.classList.add("hide");setTimeout(function(){ld.style.display="none"},700)}}
+try{
+var root=ReactDOM.createRoot(document.getElementById("root"));
+root.render(e(App));
+setTimeout(hideLoader,1800);
+}catch(err){
+try{ReactDOM.render(e(App),document.getElementById("root"));setTimeout(hideLoader,1800)}
+catch(err2){hideLoader();document.getElementById("root").innerHTML="<div style='padding:100px 20px;text-align:center;color:#e8e0ff'><h1>Error</h1><p>"+err2.message+"</p></div>"}
+}
+</script>
+</body>
+</html>
